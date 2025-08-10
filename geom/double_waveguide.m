@@ -1,4 +1,4 @@
-function coefs = double_waveguide(X,Y,amp,len,wid,wdist,dsig)
+function [coefs,dinds] = double_waveguide(X,Y,L,amp,len,wid,wdist,dsig,eps)
 
 vpre = zeros(size(X));
 
@@ -9,16 +9,18 @@ vpre(ilow) = 1;
 vpre(ihigh) = 1;
 
 N = size(X,1);
+[src,targ,ind,sz,num] = get_fft_grid(N,L,0);
 
-vpre_pad = [vpre zeros(N); zeros(N,2*N)];
+vpre_pad = [vpre zeros(N,N-1); zeros(N-1,2*N-1)];
 
-kern = exp(-(X.^2 + Y.^2)/(2*dsig.^2));
-kern_pad = [kern zeros(N); zeros(N,2*N)];
+kern = exp(-(targ(1,:).^2 + targ(2,:).^2)/(2*dsig.^2));
+kern_aug = reshape(kern,size(vpre_pad));
 
-[ii,jj] = find((abs(X) < 1e-12) & (abs(Y) < 1e-12));
-kern_pad = circshift(kern_pad,-[ii,jj]);
+ind = find(vecnorm(targ) < 1e-12);
+[ii, jj] = ind2sub(size(kern_aug), ind);
+kern_aug = circshift(kern_aug,-[ii-1,jj-1]);
 
-kern_hat = fft2(kern_pad);
+kern_hat = fft2(kern_aug);
 vpre_hat = fft2(vpre_pad);
 
 V = ifft2(kern_hat.*vpre_hat);
@@ -26,6 +28,7 @@ V = V(1:N,1:N);
 
 V = amp*V / max(V(:));
 
-coefs = {V};
+dinds = find(abs(V(:)) > eps );
+coefs = V(dinds);
 
 end

@@ -83,8 +83,6 @@ usca = usca(:,:,1);
 utot = usca + uinc;
 utot = reshape(utot,size(xxgrid));
 
-%%
-
 figure(2);
 tiledlayout(1,3)
 
