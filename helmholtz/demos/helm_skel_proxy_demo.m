@@ -11,47 +11,48 @@
 %
 %%%%%
 
-L = 5;
+L = 10;
 N = 201; 
 
-zk = 10;
+zk = 8;
 
-xs = L*(-floor(N/2):floor(N/2))/floor(N/2);
+xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 
 h = xs(2) - xs(1);
 
-coefs = bump2_helm(xxgrid,yygrid,-0.5,0.5);
+[coefs,dinds] = bump(xxgrid,yygrid,-0.5,0.5,1,1e-12);
 V = coefs{1};
+coefs{1} = coefs{1}*zk^2;
 
-dinds = find(abs(V) > 1e-12 );
-[iinds,jinds] = find(abs(V) > 1e-12 );
+[iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 fprintf('Number of points: %d \n',size(dinds,1))
 
-srcinfo = []; srcinfo.r = [xxgrid(dinds) yygrid(dinds)].'; srcinfo.wts = h^2*ones(length(dinds),1);
-targinfo = []; targinfo.r = [xxgrid(dinds) yygrid(dinds)].'; 
-targinfo.V = V(dinds);
-
 % RHS (Incident field)
-k1 = zk;
-k2 = 0;
-uinc = exp(1i*k1*xxgrid+1i*k2*yygrid);
-[rhs_vec, rhs] = get_rhs_vec_helm(coefs,zk,uinc);
-rhs_vec = rhs_vec(dinds);
+theta = -pi/3;
+uinc = planewave(zk,[xxgrid(:) yygrid(:)].',theta);
+uincs = {uinc};
+rhs_vec = get_rhs(coefs,uincs,dinds);
 
 figure(1); clf
 tiledlayout(1,2);
 
 nexttile
-s = pcolor(xxgrid,yygrid,V);
+Vplot = zeros(length(xxgrid(:)),1);
+Vplot(dinds) = V;
+Vplot = reshape(Vplot,size(xxgrid));
+s = pcolor(xxgrid,yygrid,Vplot);
 s.EdgeColor = 'None';
 colorbar
 title('V')
 drawnow
 
 nexttile
-s = pcolor(xxgrid,yygrid,real(rhs));
+rhsplot = zeros(length(xxgrid(:)),1);
+rhsplot(dinds) = rhs_vec;
+rhsplot = reshape(rhsplot,size(xxgrid));
+s = pcolor(xxgrid,yygrid,real(rhsplot));
 s.EdgeColor = 'None';
 colorbar
 title('rhs')
@@ -60,12 +61,12 @@ drawnow
 % Constructing identity + sparse corrections
 
 [inds,corrs] = get_correct_helm(h,zk);
-spmats = get_sparse_corr(size(xxgrid),inds,corrs);
-idspmat = id_plus_corr_sum_helm(zk,coefs,spmats,dinds,h);
+spmats = get_sparse_corr_mat(size(xxgrid),inds,corrs);
+idspmat = id_plus_corr_sum(coefs,spmats,dinds,h);
 
 % Defining integral operators 
 
-kernfun = @(s,t) kern_sum_helm(zk,s,t);
+gfunc = @(s,t) helmgreen1(zk,s,t);
 Afun = @(i,j) kern_matgen(i,j,srcinfo,targinfo,idspmat,kernfun);
 
 % Solve with FLAM

@@ -19,7 +19,7 @@ function C = get_sparse_corr_mat(sz,inds,corrs)
     % ks = sub2ind(size(k1s), k1s(:), k2s(:));
     % kt = sub2ind(size(k1t), k1t(:), k2t(:));
 
-    C = cell(1,numel(corrs));
+    C = cell(length(corrs),1);
 
     nx = sz(2);
     ny = sz(1);
@@ -29,48 +29,31 @@ function C = get_sparse_corr_mat(sz,inds,corrs)
     for ii = 1:numel(corrs)
         corr = corrs{ii};
         ind = inds{ii};
-        sz3 = size(corr,3);
 
-        if sz3 > 1
-            corc = cell(1,sz3);
-        end
+        kt = repmat((1:(nx*ny)).',1,numel(corr));
+        kt = kt(:);
 
-        for kk = 1:sz3
+        corr = repmat(corr.',nx*ny,1);
+        corr = corr(:);
 
-            tmpcor = corr(:,:,kk);
+        k1s = k1t(:) - ind(:,1).'; % check 
+        k2s = k2t(:) - ind(:,2).';
 
-            kt = repmat((1:(nx*ny)).',1,numel(tmpcor));
-            kt = kt(:);
+        k1s = k1s(:);
+        k2s = k2s(:);
 
-            tmpcor = repmat(tmpcor.',nx*ny,1);
-            tmpcor = tmpcor(:);
+        keep = find((abs(k1s - (nx+1)/2) <= (nx-1)/2).*(abs(k2s - (ny+1)/2) <= (ny-1)/2 ));
 
-            k1s = k1t(:) - ind(:,1).'; % check 
-            k2s = k2t(:) - ind(:,2).';
+        k1s = k1s(keep);
+        k2s = k2s(keep);
+        kt = kt(keep);
+        corr = corr(keep);
 
-            k1s = k1s(:);
-            k2s = k2s(:);
+        ks = sub2ind(sz, k2s, k1s); % k2 is row, k1 is column
 
-            keep = find((abs(k1s - (nx+1)/2) <= (nx-1)/2).*(abs(k2s - (ny+1)/2) <= (ny-1)/2 ));
+        cspar = sparse(kt,ks,corr);
 
-            k1s = k1s(keep);
-            k2s = k2s(keep);
-            kt = kt(keep);
-            tmpcor = tmpcor(keep);
-
-            ks = sub2ind(sz, k2s, k1s); % k2 is row, k1 is column
-
-            cspar = sparse(kt,ks,tmpcor);
-
-            if sz3 > 1
-                corc{kk} = cspar;
-            else
-                corc = cspar;
-            end
-
-        end
-
-        C{ii} = corc;
+        C{ii} = cspar;
     end
 
 end

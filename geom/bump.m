@@ -15,7 +15,7 @@ function [coefs,dinds] = bump(X,Y,amp,width,ncs,eps)
 
     dinds = find(abs(V) > eps );
 
-    coefs = {V(dinds),Vx(dinds),Vy(dinds),Vxx(dinds),Vxy(dinds),Vyy(dinds)};
-    coefs = coefs(1:ncs);
+    coefs = cat(3,V(dinds),Vx(dinds),Vy(dinds),Vxx(dinds),Vxy(dinds),Vyy(dinds));
+    coefs = coefs(:,:,1:ncs);
 
 end

@@ -1,4 +1,4 @@
-function M = kernmat(src,targ,func,h,inds,corrs)
+function kerns = kernmat(src,targ,func,h,inds,corrs)
 % Evaluates kernels and adds corrections to the source part based on inds
 
     kerns = func(src,targ);
@@ -10,7 +10,7 @@ function M = kernmat(src,targ,func,h,inds,corrs)
     end
 
     if correct
-        if (numel(kerns) ~= numel(inds)) | (numel(inds) ~= numel(corrs))
+        if (size(kerns,3) ~= numel(inds)) | (numel(inds) ~= numel(corrs))
             error('output of func must be the same length as inds and corrs')
         end
     end
@@ -26,33 +26,20 @@ function M = kernmat(src,targ,func,h,inds,corrs)
     
     dx = xt-xs;
     dy = yt-ys;
-    
-    dx2 = dx.*dx;
-    dy2 = dy.*dy;
-    
-    r2 = dx2 + dy2;
-    r = sqrt(r2);
 
-    M = cell(1,numel(kerns));
-
-    for ii = 1:numel(kerns)
-        kern = kerns{ii};
-        kern = kern*h*h;
-        if correct
+    kerns = kerns*h*h;
+    
+    if correct
+        for ii = 1:length(corrs)
             ind = inds{ii};
             corr = corrs{ii};
-            sz3 = size(corr,3);
-            for kk = 1:sz3
-                tmpker = kern(:,:,kk);
-                tmpcor = corr(:,:,kk);
-                for jj = 1:numel(corr(:,:,1))
-                    tmpker((round(dx/h) == ind(jj,1)) & (round(dy/h) == ind(jj,2))) = ...
-                        tmpker((round(dx/h) == ind(jj,1)) & (round(dy/h) == ind(jj,2))) + h*h*tmpcor(jj,1);
-                end
-                kern(:,:,kk) = tmpker;
+            kern = kerns(:,:,ii);
+            for jj = 1:numel(corr(:,:,ii))
+                kern((round(dx/h) == ind(jj,1)) & (round(dy/h) == ind(jj,2))) = ...
+                    kern((round(dx/h) == ind(jj,1)) & (round(dy/h) == ind(jj,2))) + h*h*corr(jj,1);
             end
+            kerns(:,:,ii) = kern;
         end
-        M{ii} = kern;
     end
 
 end

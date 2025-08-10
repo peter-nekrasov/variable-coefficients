@@ -25,7 +25,7 @@ function err1 = get_fin_diff_err(X,Y,utot,h,coefs,xloc,yloc,zk,dinds,eqtype)
     lap = lap / h^2;
 
     zk2V = zeros(size(X));
-    zk2V(dinds) = coefs{1};
+    zk2V(dinds) = coefs(:,:,1);
 
     % Residual error of total solution 
     usub = utot(ii-4:ii+4,jj-4:jj+4);

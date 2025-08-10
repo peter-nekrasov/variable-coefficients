@@ -1,18 +1,13 @@
-function M = gen_fft_kerns(kerns,sz,ind)
+function fft_kerns = gen_fft_kerns(kerns,sz,ind)
 
     [zi,zj] = ind2sub(sz,ind);
-    M = cell(1,numel(kerns));
+    % fft_kerns = zeros([sqrt(size(kerns,1)) sqrt(size(kerns,1)) size(kerns,3)]);
 
-    for ii = 1:numel(kerns)
-        kern = kerns{ii};
-        sz3 = size(kern,3);
-        fftkern = zeros([sz, sz3]);
-        for kk = 1:sz3
-            GS = reshape(kern(:,:,kk),sz);
-            GS = circshift(GS,-[zi-1,zj-1]);
-            fftkern(:,:,kk) = fft2(GS);
-        end
-        M{ii} = fftkern;
+    for ii = 1:size(kerns,3)
+        kern = kerns(:,:,ii);
+        GS = reshape(kern(:,:,ii),sz);
+        GS = circshift(GS,-[zi-1,zj-1]);
+        fft_kerns(:,:,ii) = fft2(GS);
     end
     
 end

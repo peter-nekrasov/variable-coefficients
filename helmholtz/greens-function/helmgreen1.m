@@ -1,5 +1,5 @@
 function kerns = helmgreen1(zk,src,targ)
-%CHNK.HELM2D.GREEN evaluate the helmholtz green's function
+% helmgreen1 evaluate the helmholtz green's function
 % for the given sources and targets
 
 [~,ns] = size(src);
@@ -23,8 +23,6 @@ r2 = rx2+ry2;
 
 r = sqrt(r2);
 
-kerns = cell(1);
-
 if nargout > 0
     h0 = besselh(0,1,zk*r);
     val = 0.25*1i*h0;
@@ -32,4 +30,4 @@ if nargout > 0
     val(r < 1e-12) = 1/(2*pi)*(1i*pi/2  - eulgam + log(2/zk));
 end
 
-kerns{1} = -val;
+kerns = -val;

@@ -22,8 +22,8 @@ xs = linspace(-L/2,L/2,N1);
 h = xs(2) - xs(1);
 
 [coefs,dinds] = bump(xxgrid,yygrid,-0.5,0.5,1,1e-12);
-V = coefs{1};
-coefs{1} = coefs{1}*zk^2;
+V = coefs(:,:,1);
+coefs = coefs*zk^2;
 
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
@@ -32,8 +32,7 @@ fprintf('Number of points: %d \n',size(dinds,1))
 % RHS (Incident field)
 theta = -pi/3;
 uinc = planewave(zk,[xxgrid(:) yygrid(:)].',theta);
-uincs = {uinc};
-rhs_vec = get_rhs(coefs,uincs,dinds);
+rhs_vec = get_rhs(coefs,uinc,dinds);
 
 figure(1); clf
 tiledlayout(1,2);
@@ -59,25 +58,29 @@ title('rhs')
 drawnow
 
 % Constructing integral operators
-[src,targ,ind,sz,N2] = get_fft_grid(N1,L,0);
+[src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
 [inds,corrs] = get_correct_helm(h,zk);
-spmats = get_sparse_corr_mat(size(xxgrid),inds,corrs);
-kerns = kernmat(src,targ,@(s,t) helmgreen1(zk,s,t),h);
+gfunc = @(s,t) helmgreen1(zk,s,t);
+spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
+% kerns = kernmat(src,targ,gfunc,h);
+kerns = kernmat(src,targ,gfunc,h,inds,corrs);
 kerns = gen_fft_kerns(kerns,sz,ind);
 
 % Solve with GMRES
 start = tic;
-sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,spmats,h,dinds,iinds,jinds,N2),rhs_vec,[],1e-10,200);
+% sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,spmats,h,dinds,iinds,jinds,N2),rhs_vec,[],1e-10,200);
+sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-10,200);
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;
 t1 = toc(start);
 fprintf('Time to solve: %5.2e s\n',t1)
 
-evalkerns = {kerns{1}};
-evalcorrs = {spmats{1}};
+evalkerns = kerns(:,:,1);
+evalspmats = {spmats{1}};
 
-usca = sol_eval_fft(sol,evalkerns,evalcorrs,h,dinds,iinds,jinds,N1,N2);
-usca = usca{1};
+% usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
+usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
+usca = usca(:,:,1);
 
 utot = usca + uinc;
 utot = reshape(utot,size(xxgrid));
