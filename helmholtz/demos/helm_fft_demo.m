@@ -12,7 +12,7 @@
 %%%%%
 
 L = 10; % length of grid
-N1 = 301; % needs to be an odd number for FFT
+N1 = 300; % number of grid points
 
 zk = 8;
 
@@ -21,7 +21,7 @@ xs = linspace(-L/2,L/2,N1);
 
 h = xs(2) - xs(1);
 
-[coefs,dinds] = bump(xxgrid,yygrid,-0.5,0.5,1,1e-12);
+[coefs,dinds] = bump(xxgrid,yygrid,-0.5,0.5,1,1e-8);
 V = coefs(:,:,1);
 coefs = coefs*zk^2;
 
@@ -41,8 +41,7 @@ nexttile
 Vplot = zeros(length(xxgrid(:)),1);
 Vplot(dinds) = V;
 Vplot = reshape(Vplot,size(xxgrid));
-s = pcolor(xxgrid,yygrid,Vplot);
-s.EdgeColor = 'None';
+pcolor(xxgrid,yygrid,Vplot); shading interp;
 colorbar
 title('V')
 drawnow
@@ -51,8 +50,7 @@ nexttile
 rhsplot = zeros(length(xxgrid(:)),1);
 rhsplot(dinds) = rhs_vec;
 rhsplot = reshape(rhsplot,size(xxgrid));
-s = pcolor(xxgrid,yygrid,real(rhsplot));
-s.EdgeColor = 'None';
+pcolor(xxgrid,yygrid,real(rhsplot)); shading interp;
 colorbar
 title('rhs')
 drawnow
@@ -91,21 +89,18 @@ figure(2);
 tiledlayout(1,3)
 
 nexttile
-pc = pcolor(xxgrid,yygrid,real(mu));
-pc.EdgeColor = 'none';
+pc = pcolor(xxgrid,yygrid,real(mu)); shading interp;
 title('Re(\mu)')
 colorbar
 
 nexttile
-pc = pcolor(xxgrid,yygrid,real(utot));
-pc.EdgeColor = 'none';
-title('Re(\phi)')
+pc = pcolor(xxgrid,yygrid,real(utot)); shading interp;
+title('Re(u)')
 colorbar
 
 nexttile
-pc = pcolor(xxgrid,yygrid,abs(utot));
-pc.EdgeColor = 'none';
-title('|\phi|')
+pc = pcolor(xxgrid,yygrid,abs(utot)); shading interp;
+title('|u|')
 colorbar
        
 % Calculate error with finite difference

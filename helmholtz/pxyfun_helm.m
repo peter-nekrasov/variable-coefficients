@@ -14,8 +14,8 @@ pxy = bsxfun(@plus,ctr,diag(l)*proxy);
 rsrc = x(:,slf);
 rtar = pxy;
 
-Kpxy_helm = helm2d.green_cell_helm(zk,rsrc,rtar);
-Kpxy_helm = Kpxy_helm{1};
+Kpxy_helm = helmgreen1(zk,rsrc,rtar);
+Kpxy_helm = Kpxy_helm(:,:,1);
 
 Kpxy_helm_1 = bsxfun(@times,Kpxy_helm,quads(slf).');
 Kpxy_helm_trans_1 = bsxfun(@times,zk^2*V(slf).'/size(proxy,2),Kpxy_helm);
