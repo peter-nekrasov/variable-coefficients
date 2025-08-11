@@ -9,13 +9,13 @@ function sol = sol_eval_fft(mu,kerns,iinds,jinds,N,num)
 
     sol = zeros([N^2,1,size(kerns,3)]);
 
-    for ii = size(kerns,3)
+    for ii = 1:size(kerns,3)
 
     G_aug_hat = kerns(:,:,ii);
 
     G_mu_aug = ifft2(G_aug_hat.*mu_aug_hat);
     G_mu = G_mu_aug(1:N,1:N);
-    sol(:,:,ii) = G_mu(:);
+    sol(:,1,ii) = G_mu(:);
 
     end
 

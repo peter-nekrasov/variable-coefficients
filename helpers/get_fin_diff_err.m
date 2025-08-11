@@ -93,9 +93,9 @@ function err1 = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqtype)
     hessxy = d1*d1.' / h^2;
 
     % Error of scattered part
-    % phi_n_sub = phi_n(ii-4:ii+4,jj-4:jj+4);
-    % first = alpha(ii,jj)*sum(bilap.*phi_n_sub,'all') ;
-    % second = -beta(ii,jj)*phi_n(ii,jj);
+    % phi_z_sub = phi_z(ii-4:ii+4,jj-4:jj+4);
+    % first = alpha(ii,jj)*sum(bilap.*phi_z_sub,'all') ;
+    % second = -beta(ii,jj)*phi_z(ii,jj);
     % third = gamma*phi(ii,jj);
     % rhs = k*bbar(ii,jj)*phiinc(ii,jj);
     % err = abs(first + second + third - rhs) 
@@ -110,17 +110,20 @@ function err1 = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqtype)
     alphayy = coefs{11};
     nu = coefs{end};
     alphalap = alphaxx + alphayy;
+
+    phi_z = utots(:,:,1);
+    phi = utots(:,:,2);
     
     % Residual error of total solution 
-    phi_n_sub = phi_n(ii-4:ii+4,jj-4:jj+4);
-    first = alpha(ii,jj).*sum(bilap.*phi_n_sub,'all') ;
-    second = 2*alphax(ii,jj).*sum(gradlapx.*phi_n_sub,'all');
-    third = 2*alphay(ii,jj).*sum(gradlapy.*phi_n_sub,'all');
-    fourth = alphalap(ii,jj).*sum(lap.*phi_n_sub,'all');
-    fifth = -(1-nu)*alphayy(ii,jj).*sum(hessxx.*phi_n_sub,'all');
-    sixth = -(1-nu)*alphaxx(ii,jj).*sum(hessyy.*phi_n_sub,'all');
-    seventh = 2*(1-nu)*alphaxy(ii,jj).*sum(hessxy.*phi_n_sub,'all');
-    bterm = -beta(ii,jj).*phi_n(ii,jj);
+    phi_z_sub = phi_z(ii-4:ii+4,jj-4:jj+4);
+    first = alpha(ii,jj).*sum(bilap.*phi_z_sub,'all') ;
+    second = 2*alphax(ii,jj).*sum(gradlapx.*phi_z_sub,'all');
+    third = 2*alphay(ii,jj).*sum(gradlapy.*phi_z_sub,'all');
+    fourth = alphalap(ii,jj).*sum(lap.*phi_z_sub,'all');
+    fifth = -(1-nu)*alphayy(ii,jj).*sum(hessxx.*phi_z_sub,'all');
+    sixth = -(1-nu)*alphaxx(ii,jj).*sum(hessyy.*phi_z_sub,'all');
+    seventh = 2*(1-nu)*alphaxy(ii,jj).*sum(hessxy.*phi_z_sub,'all');
+    bterm = -beta(ii,jj).*phi_z(ii,jj);
     gterm = g0.*phi(ii,jj);
     err1 = abs(first + second + third + fourth + fifth + sixth + seventh + bterm + gterm) / max(abs([first second third fourth fifth sixth seventh bterm gterm]));
 
