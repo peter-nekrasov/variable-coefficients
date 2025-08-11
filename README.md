@@ -9,3 +9,7 @@ There is currently support for:
 - Helmholtz
 
 $$ \Delta u + k^2(1+V(x)) u = 0 $$
+
+- Flexural-Gravity
+
+$$  \Delta( \alpha \Delta) \partial_z \phi + (1 - \nu) \left( 2 \frac{\partial^2 \alpha}{\partial x \partial y } \frac{\partial^2 }{\partial x \partial y } - \frac{\partial^2 \alpha}{\partial x^2} \frac{\partial^2 }{\partial y^2}  - \frac{\partial^2 \alpha}{\partial y^2} \frac{\partial^2 }{\partial x^2}  \right) \partial_z \phi - \beta \partial_z \phi + \gamma \phi = 0  $$
