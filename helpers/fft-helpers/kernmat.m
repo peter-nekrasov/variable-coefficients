@@ -34,7 +34,7 @@ function kerns = kernmat(src,targ,func,h,inds,corrs)
             ind = inds{ii};
             corr = corrs{ii};
             kern = kerns(:,:,ii);
-            for jj = 1:numel(corr(:,:,ii))
+            for jj = 1:length(corr)
                 kern((round(dx/h) == ind(jj,1)) & (round(dy/h) == ind(jj,2))) = ...
                     kern((round(dx/h) == ind(jj,1)) & (round(dy/h) == ind(jj,2))) + h*h*corr(jj,1);
             end

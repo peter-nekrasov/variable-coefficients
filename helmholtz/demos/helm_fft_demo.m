@@ -56,17 +56,18 @@ title('rhs')
 drawnow
 
 % Constructing integral operators
-[src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
+[src,targ,ind,sz,N2] = get_fft_grid(N1,L,0);
 [inds,corrs] = get_correct_helm(h,zk);
 gfunc = @(s,t) helmgreen1(zk,s,t);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
+% idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
 % kerns = kernmat(src,targ,gfunc,h);
 kerns = kernmat(src,targ,gfunc,h,inds,corrs);
 kerns = gen_fft_kerns(kerns,sz,ind);
 
 % Solve with GMRES
 start = tic;
-% sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,spmats,h,dinds,iinds,jinds,N2),rhs_vec,[],1e-10,200);
+% sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,idspmats,iinds,jinds,N2),rhs_vec,[],1e-10,200);
 sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-10,200);
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;

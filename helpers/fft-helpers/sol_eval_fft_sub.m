@@ -1,7 +1,7 @@
 function sol = sol_eval_fft_sub(mu,kerns,corrs,h,dinds,iinds,jinds,N,num)
 % Apply kernels for evaluation using FFT w/ corrections
 
-    if size(kerns,3) ~= size(corrs,3)
+    if size(kerns,3) ~= length(corrs)
         error('kerns and corrs must have the same number of pages')
     end
 
@@ -16,7 +16,7 @@ function sol = sol_eval_fft_sub(mu,kerns,corrs,h,dinds,iinds,jinds,N,num)
 
     sol = zeros([N^2,1,size(kerns,3)]);
 
-    for ii = size(kerns,3)
+    for ii = 1:size(kerns,3)
 
     G_aug_hat = kerns(:,:,ii);
     G_corr = corrs{ii};

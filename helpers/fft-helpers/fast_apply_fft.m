@@ -6,16 +6,16 @@ function v = fast_apply_fft(mu,kerns,coefs,iinds,jinds,N)
 
     v = mu;
 
-    for ii = 1:size(kerns,3)
-    
-    cs = coefs(:,:,ii);
-    G_hat = kerns(:,:,ii);
-
     dinds_aug = sub2ind([N N], iinds, jinds);
 
     mu_aug = zeros(N);
     mu_aug(dinds_aug) = mu;
     mu_aug_hat = fft2(mu_aug);
+
+    for ii = 1:size(kerns,3)
+    
+    cs = coefs(:,:,ii);
+    G_hat = kerns(:,:,ii);
 
     G_mu_aug = ifft2(G_hat.*mu_aug_hat);
     G_mu = G_mu_aug(dinds_aug);

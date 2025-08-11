@@ -159,10 +159,9 @@ err = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,L/4,wgdist/2,zk,dinds,'helm');
 
 fprintf('Finite difference error: %.4e \n',err)
 
-
 return
 
-%% solving the same problem with FFT
+%%% solving the waveguide example with FFT + GMRES
 
 gfunc = @(s,t) helmgreen1(zk,s,t);
 kerns = kernmat(src,targ,gfunc,h,inds,corrs);
@@ -171,18 +170,8 @@ kerns = gen_fft_kerns(kerns,sz,ind);
 % Solve with GMRES
 start = tic;
 % sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,spmats,h,dinds,iinds,jinds,N2),rhs_vec,[],1e-10,200);
-sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-8,2000);
+sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-8,5000);
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;
 t1 = toc(start);
 fprintf('Time to solve: %5.2e s\n',t1)
-
-evalkerns = kerns(:,:,1);
-evalspmats = {spmats{1}};
-
-% usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
-usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
-usca = usca(:,:,1);
-
-utot = usca + uinc;
-utot = reshape(utot,size(xxgrid));
