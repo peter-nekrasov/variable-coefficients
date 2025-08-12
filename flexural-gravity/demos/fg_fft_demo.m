@@ -7,7 +7,7 @@
 %%%%%
 
 L = 1000; % length of grid
-N1 = 800; % number of grid points
+N1 = 400; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
