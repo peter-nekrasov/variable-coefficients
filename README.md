@@ -2,7 +2,7 @@ Peter's code for solving variable coefficient scattering problems in 2D. The exa
 
 $$ \mu(x) + \sum_{i=1}^N V_i(x) \int_{\Omega} K_i (x-y) \mu(y) \ d y  = f(x) $$ 
 
-where $\Omega \subset \mathbb{R}^2$. The code stores both the coefficients $V_i$ and the kernels $K_i$ and sums them up in a systematic way. The quadrature used here is Zeta-corrected trapezoidal rule (see Wu & Martinson, 2021).
+where $\Omega \subset \mathbb{R}^2$. The code stores both the coefficients $V_i$ and the kernels $K_i$ as rank 3 tensors and sums them up in a systematic way. The quadrature used here is Zeta-corrected trapezoidal rule (see Wu & Martinson, 2021).
 
 There is currently support for:
 
