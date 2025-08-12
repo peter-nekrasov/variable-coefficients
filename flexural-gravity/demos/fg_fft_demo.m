@@ -89,9 +89,7 @@ mu(dinds) = sol;
 t1 = toc(start);
 fprintf('%5.2e s : time to solve\n',t1)
 
-evalkerns = zeros([N2 N2 2]);
-evalkerns(:,:,1) = kerns(:,:,1);
-evalkerns(:,:,2) = kerns(:,:,8);
+evalkerns = kerns(:,:,[1 8]);
 evalspmats = {spmats{1},spmats{8}};
 
 usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
