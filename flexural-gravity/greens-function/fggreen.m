@@ -162,9 +162,7 @@ for i = 1:5
 end
 
 val = 1/2*val;
-phi = 1/2*phi;
-%gradx = 1/2*gradx;
-%grady = pi/2*grady;
+phi = 1/4*phi;
 hessxx = 1/2*hessxx;
 hessxy = 1/2*hessxy;
 hessyy = 1/2*hessyy;

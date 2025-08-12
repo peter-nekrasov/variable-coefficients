@@ -1,4 +1,4 @@
-function out = green1d(rts,ejs,src,targ,theta)
+function [out] = green1d(rts,ejs,src,targ,theta)
 % green1d evaluates the one-dimensional G_S centered at src pointing in the
 % direction of theta
 %
@@ -38,9 +38,35 @@ hessxy = 0;
 hessyy = 0;
 gradlapx = 0;
 gradlapy = 0;
+grad = 0;
+hess = 0;
 
 r = (cos(theta)*dx + sin(theta)*dy);
 r2 = (cos(theta)*dx + sin(theta)*dy).^2;
+
+
+% for i = 1:5
+% 
+%     rhoj = rts(i);
+%     ej = ejs(i);
+% 
+%     val = val + 1/(2*pi)*ej*rhoj*(expeval(1i*rhoj*abs(rx))+expeval(-1i*rhoj*abs(rx)));
+%     grad = grad + 1i*sign(rx)/(2*pi)*ej*rhoj^2.*(expeval(1i*rhoj*abs(rx))-expeval(-1i*rhoj*abs(rx)));
+%     hess = hess - 1/(2*pi)*ej*rhoj^3.*(expeval(1i*rhoj*abs(rx))+expeval(-1i*rhoj*abs(rx)));
+%     phi = phi + 1/(4*pi)*ej*(expeval(1i*rhoj*abs(rx))+expeval(-1i*rhoj*abs(rx)));
+% 
+%     if (angle(rhoj) < 1e-6) && (angle(rhoj) >= 0) && (rhoj ~= 0)
+% 
+%         val = val + 1i*ej*rhoj*exp(1i*rhoj*abs(rx));
+%         grad = grad - ej*rhoj^2*sign(rx).*exp(1i*rhoj*abs(rx));
+%         hess = hess - 1i*ej*rhoj^3*exp(1i*rhoj*abs(rx));
+%         phi = phi + 1i/2*ej*exp(1i*rhoj*abs(rx));
+% 
+%     end
+% 
+%     % val(rx == 0) = val(rx == 0) - ej.*rhoj.*(log(1i*rhoj)+log(-1i*rhoj))/(2*pi); 
+% 
+% end
 
 for i = 1:5
 
@@ -62,7 +88,7 @@ for i = 1:5
     phi = phi + 1/(4*pi)*ej*(expeval(1i*rhoj*abs(r))+expeval(-1i*rhoj*abs(r)));
 
     if (angle(rhoj) < 1e-8) && (angle(rhoj) >= 0) && (rhoj ~= 0)
-        
+
         val = val + 1i*ej*rhoj*exp(1i*rhoj*abs(r));
 
         % gradx = gradx - sign(r).*cos(theta)*ej*rhoj^2.*exp(1i*rhoj*abs(r));
@@ -76,7 +102,7 @@ for i = 1:5
         gradlapy = gradlapy + sign(r)*sin(theta)*ej*rhoj^4.*exp(1i*rhoj*abs(r));
 
         phi = phi + 1i/2*ej*exp(1i*rhoj*abs(r));
-    
+
     end
 
 end
