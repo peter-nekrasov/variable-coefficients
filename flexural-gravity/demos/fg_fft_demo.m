@@ -42,7 +42,7 @@ uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
 uincs(:,:,8) = pws(dinds,:,1) / zk;
 
 rhs_vec = get_rhs(coefs,uincs);
-coefs = coefs/2;
+coefs(:,:,1:end-1) = coefs(:,:,1:end-1)/2;
 
 figure(1); clf
 tiledlayout(1,3);
@@ -76,14 +76,14 @@ drawnow
 gfunc = @(s,t) fggreen(s,t,rts,ejs);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
-kerns = kernmat(src,targ,gfunc,h);
-% kerns = kernmat(src,targ,gfunc,h,inds,corrs);
+%kerns = kernmat(src,targ,gfunc,h);
+kerns = kernmat(src,targ,gfunc,h,inds,corrs);
 kerns = gen_fft_kerns(kerns,sz,ind);
 
 % Solve with GMRES
 start = tic;
-% sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-12,200);
-sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,idspmats,iinds,jinds,N2),rhs_vec,[],1e-10,200);
+sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-12,200);
+% sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,idspmats,iinds,jinds,N2),rhs_vec,[],1e-10,200);
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;
 t1 = toc(start);
@@ -92,10 +92,10 @@ fprintf('%5.2e s : time to solve\n',t1)
 evalkerns = kerns(:,:,[1,8]);
 evalspmats = {spmats{1},spmats{8}};
 
-usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
-% usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
+% usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
+usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 phizsca = usca(:,:,1)/2;
-phisca = usca(:,:,2)/2;
+phisca = usca(:,:,2);
 
 phitot = phisca + phiinc;
 phiztot = phizsca + phizinc;
