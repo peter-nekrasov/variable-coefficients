@@ -7,7 +7,7 @@ function [Kpxy,nbr] = pxyfun_fg(x,slf,nbr,l,ctr,quads,zk,rts,ejs,coefs)
 npxy = 100+round(zk*1.5*max(l)*2);
 rmin = 1.5;
 rmax = rmin+max(2*pi/zk/max(l),0.5*rmin);
-proxy = get_proxy_ann(rmin,5,npxy,rmax);
+proxy = get_proxy_ann(rmin,8,npxy,rmax);
 
 pxy = bsxfun(@plus,ctr,diag(l)*proxy);
 
