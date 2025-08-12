@@ -114,9 +114,7 @@ gfunc = @(s,t) fggreen(s,t,rts,ejs);
 kerns = kernmat(src,targ,gfunc,h);
 kerns = gen_fft_kerns(kerns,sz,ind);
 
-evalkerns = zeros([N2 N2 2]);
-evalkerns(:,:,1) = kerns(:,:,1);
-evalkerns(:,:,2) = kerns(:,:,8);
+evalkerns = kerns(:,:,[1,8]);
 evalspmats = {spmats{1},spmats{8}};
 
 usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
