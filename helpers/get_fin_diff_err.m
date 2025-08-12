@@ -1,4 +1,4 @@
-function err1 = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqtype)
+function [err1,err2] = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqtype)
 % finite difference test for helmholtz equation
 % checks error of utot at the closest point to (xloc,yloc)
 
@@ -125,7 +125,8 @@ function err1 = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqtype)
     seventh = 2*(1-nu)*alphaxy(ii,jj).*sum(hessxy.*phi_z_sub,'all');
     bterm = -beta(ii,jj).*phi_z(ii,jj);
     gterm = g0.*phi(ii,jj);
-    err1 = abs(first + second + third + fourth + fifth + sixth + seventh + bterm + gterm) / max(abs([first second third fourth fifth sixth seventh bterm gterm]));
+    err1 = abs(first + second + third + fourth + fifth + sixth + seventh + bterm + gterm) ;
+    err2 = err1 / max(abs([first second third fourth fifth sixth seventh bterm gterm]));
 
     end
     

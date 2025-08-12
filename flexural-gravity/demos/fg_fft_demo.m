@@ -133,8 +133,9 @@ colorbar
        
 % Calculate error with finite difference
 utots = cat(3,phiztot,phitot);
-err = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg');
 
-fprintf('Finite difference error: %.4e \n',err)
+fprintf('Absolute error: %.4e \n',abs_err)
+fprintf('Relative error: %.4e \n',rel_err)
 
 return
