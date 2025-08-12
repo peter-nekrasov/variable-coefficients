@@ -42,8 +42,7 @@ uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
 uincs(:,:,8) = pws(dinds,:,1) / zk;
 
 rhs_vec = get_rhs(coefs,uincs);
-coefs = coefs/2;
-coefs(:,:,end) = 2*coefs(:,:,end);
+coefs(:,:,1:end-1) = 1/2*coefs(:,:,1:end-1);
 
 figure(1); clf
 tiledlayout(1,3);

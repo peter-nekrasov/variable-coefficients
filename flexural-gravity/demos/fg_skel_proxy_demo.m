@@ -7,7 +7,7 @@
 %%%%%
 
 L = 1000; % length of grid
-N1 = 200; % number of grid points
+N1 = 100; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
@@ -42,8 +42,7 @@ uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
 uincs(:,:,8) = pws(dinds,:,1) / zk;
 
 rhs_vec = get_rhs(coefs,uincs);
-coefs = coefs/2;
-coefs(:,:,end) = 2*coefs(:,:,end);
+coefs(:,:,1:end-1) = 1/2*coefs(:,:,1:end-1);
 
 figure(1); clf
 tiledlayout(1,3);
@@ -121,7 +120,7 @@ evalspmats = {spmats{1},spmats{8}};
 usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
 % usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 phizsca = usca(:,:,1)/2;
-phisca = usca(:,:,2)/2;
+phisca = usca(:,:,2);
 
 phitot = phisca + phiinc;
 phiztot = phizsca + phizinc;
@@ -159,8 +158,9 @@ colorbar
        
 % Calculate error with finite difference
 utots = cat(3,phiztot,phitot);
-err = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg');
 
-fprintf('Finite difference error: %.4e \n',err)
+fprintf('Absolute error (fin diff): %.4e \n',abs_err)
+fprintf('Relative error (fin diff): %.4e \n',rel_err)
 
 return
