@@ -7,7 +7,7 @@
 %%%%%
 
 L = 1000; % length of grid
-N1 = 160; % number of grid points
+N1 = 150; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
@@ -71,23 +71,48 @@ title('rhs')
 drawnow
 
 % Constructing integral operators
-[src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
 [inds,corrs] = get_correct_fg(h,a0);
-gfunc = @(s,t) fggreen(s,t,rts,ejs);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
-kerns = kernmat(src,targ,gfunc,h);
-% kerns = kernmat(src,targ,gfunc,h,inds,corrs);
-kerns = gen_fft_kerns(kerns,sz,ind);
 
-% Solve with GMRES
+% Defining integral operators 
+
+srcinfo = []; srcinfo.r = [xxgrid(dinds) yygrid(dinds)].'; srcinfo.wts = h^2*ones(length(dinds),1);
+targinfo = []; targinfo.r = srcinfo.r; 
+
+gfunc = @(s,t) fggreen(s.r,t.r,rts,ejs);
+Afun = @(i,j) kern_matgen(i,j,srcinfo,targinfo,coefs,gfunc,idspmats);
+
+% Solve with FLAM
+
+quads = srcinfo.wts;
+pxyf = @(x,slf,nbr,l,ctr)  pxyfun_fg(x,slf,nbr,l,ctr,quads,zk,rts,ejs,coefs);
+
+rs          = srcinfo.r;
+occ         = 2048;
+rank_or_tol = 1E-8;
+opts        = [];
+% pxyf        = [];
+
 start = tic;
-% sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-12,200);
-sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,idspmats,iinds,jinds,N2),rhs_vec,[],1e-10,200);
+F = rskelf(Afun,rs,occ,rank_or_tol,pxyf,opts);
+t2 = toc(start);
+fprintf('%5.2e s : time to factorize inverse (skel) \n',t2)
+
+start = tic;
+sol = rskelf_sv(F,rhs_vec);
+t3 = toc(start);
+fprintf('%5.2e s : time to solve (skel) \n',t3)
+
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;
-t1 = toc(start);
-fprintf('%5.2e s : time to solve\n',t1)
+ 
+% Plot with FFT
+
+[src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
+gfunc = @(s,t) fggreen(s,t,rts,ejs);
+kerns = kernmat(src,targ,gfunc,h);
+kerns = gen_fft_kerns(kerns,sz,ind);
 
 evalkerns = zeros([N2 N2 2]);
 evalkerns(:,:,1) = kerns(:,:,1);

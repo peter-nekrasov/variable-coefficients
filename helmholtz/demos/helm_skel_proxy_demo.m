@@ -11,17 +11,18 @@
 %
 %%%%%
 
-L = 10; % length of grid
+L = 1000; % length of grid
 N1 = 150; % number of grid points
 
 zk = 8;
+zk =  0.063360029045643 ;
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 
 h = xs(2) - xs(1);
 
-[coefs,dinds] = bump(xxgrid,yygrid,-0.5,0.5,1,1e-8);
+[coefs,dinds] = bump(xxgrid,yygrid,0.25,50,1,1e-12);
 V = coefs(:,:,1);
 coefs = coefs*zk^2;
 
@@ -75,7 +76,7 @@ quads = srcinfo.wts;
 pxyf = @(x,slf,nbr,l,ctr)  pxyfun_helm(x,slf,nbr,l,ctr,quads,zk,V);
 
 rs          = srcinfo.r;
-occ         = 4000;
+occ         = 2048;
 rank_or_tol = 1E-8;
 opts        = [];
 
