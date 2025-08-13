@@ -9,7 +9,7 @@ srcloc = [-300;-300];
 theta = pi/3;
 
 L = 1000;
-N1 = 400;
+N1 = 200;
 
 % Frequency/time parameters
 
@@ -49,13 +49,14 @@ for ii = 1:nw
     zk = rts((imag(rts) == 0) & (real(rts) > 0));
     ejs = ejs/a0;
 
-    uincs = green1d(rts,ejs,srcloc,[xxgrid(:) yygrid(:)].',theta);
+    % uincs = green1d(rts,ejs,srcloc,[xxgrid(:) yygrid(:)].',theta);
+    uincs = fggreen(srcloc,[xxgrid(:) yygrid(:)].',rts,ejs);
     % cnst = max(kerns{1}(:));
     % kerns = cellfun(@(x) x/cnst,kerns,'UniformOutput',false);
     phizinc = uincs(:,:,1)/2;
     phiinc = uincs(:,:,end);
     rhs_vec = get_rhs(coefs,uincs,dinds);
-    coefs = coefs / 2;
+    coefs(:,:,1:end-1) = 1/2*coefs(:,:,1:end-1);
 
     gfunc = @(s,t) fggreen(s,t,rts,ejs);
     kerns = kernmat(src,targ,gfunc,h,inds,corrs);
@@ -72,10 +73,9 @@ for ii = 1:nw
     fprintf('%5.2e s : time to solve\n',t1)
     
     usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
-    
     phizsca = usca(:,:,1)/2;
     phisca = usca(:,:,2);
-    
+        
     phitot = phisca + phiinc;
     phiztot = phizsca + phizinc;
     
@@ -93,7 +93,7 @@ for ii = 1:nw
     % title(['\omega = ',ws(ii)]);
     % drawnow
     utots = cat(3,reshape(phiztot,size(xxgrid)),reshape(phitot,size(xxgrid)));
-    [abs_err, rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,400,400,zk,dinds,'fg')
+    [abs_err, rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,50,50,zk,dinds,'fg')
 
     ints_phi(ii,:) = phitot.*gtilde(ws(ii));
     ints_phi_z(ii,:) = phiztot.*gtilde(ws(ii));
