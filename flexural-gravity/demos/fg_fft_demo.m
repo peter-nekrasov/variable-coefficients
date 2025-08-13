@@ -7,13 +7,13 @@
 %%%%%
 
 L = 1000; % length of grid
-N1 = 200; % number of grid points
+N1 = 400; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-[coefs,dinds,pcoefs] = bump2(xxgrid,yygrid,2,50,8,1e-12);
+[coefs,dinds,pcoefs] = bump2(xxgrid,yygrid,5,50,8,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 a0 = pcoefs{1}; 
@@ -28,7 +28,13 @@ ejs = ejs/a0;
 zk = rts((abs(angle(rts)) < 1e-6) & (real(rts) > 0));
 
 % RHS (Incident field)
-theta = -pi/4;
+
+incfield = 'pointsource';
+% incfield = 'planewave';
+
+if strcmpi(incfield,'planewave')
+
+theta = pi/4;
 pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
 phizinc = pws(:,:,1);
 phiinc = pws(:,:,1) / zk;
@@ -41,11 +47,21 @@ uincs(:,:,6) = pws(dinds,:,7) + pws(dinds,:,9);
 uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
 uincs(:,:,8) = pws(dinds,:,1) / zk;
 
+elseif strcmpi(incfield,'pointsource')
+
+uincs = fggreen([-L/2;-L/2],[xxgrid(:) yygrid(:)].',rts,ejs);
+phizinc = uincs(:,:,1)/2;
+phiinc = uincs(:,:,end);
+uincs = uincs(dinds,:,:);
+uincs(:,:,1:end-1) = uincs(:,:,1:end-1)/2;
+
+end
+
 rhs_vec = get_rhs(coefs,uincs);
 coefs(:,:,1:end-1) = 1/2*coefs(:,:,1:end-1);
 
 figure(1); clf
-tiledlayout(1,3);
+tiledlayout(2,2);
 
 nexttile
 aplot = pcoefs{1} + pcoefs{2};
@@ -59,6 +75,13 @@ bplot = pcoefs{3} + pcoefs{4};
 pcolor(xxgrid,yygrid,bplot); shading interp;
 colorbar
 title('\beta')
+drawnow
+
+nexttile
+phizplot = reshape(phizinc,size(xxgrid));
+pcolor(xxgrid,yygrid,real(phizplot)); shading interp;
+colorbar
+title('\phi^{(i)}')
 drawnow
 
 nexttile
@@ -97,11 +120,11 @@ usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 phizsca = usca(:,:,1)/2;
 phisca = usca(:,:,2);
 
-phitot = phisca + phiinc;
 phiztot = phizsca + phizinc;
+phitot = phisca + phiinc;
 
-phitot = reshape(phitot,size(xxgrid));
 phiztot = reshape(phiztot,size(xxgrid));
+phitot = reshape(phitot,size(xxgrid));
 
 figure(2);
 pc = pcolor(xxgrid,yygrid,real(mu)); shading interp;

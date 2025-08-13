@@ -28,7 +28,13 @@ ejs = ejs/a0;
 zk = rts((abs(angle(rts)) < 1e-6) & (real(rts) > 0));
 
 % RHS (Incident field)
-theta = -pi/4;
+
+% incfield = 'pointsource';
+incfield = 'planewave';
+
+if strcmpi(incfield,'planewave')
+
+theta = pi/4;
 pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
 phizinc = pws(:,:,1);
 phiinc = pws(:,:,1) / zk;
@@ -40,6 +46,16 @@ uincs(:,:,5) = pws(dinds,:,4) + pws(dinds,:,6);
 uincs(:,:,6) = pws(dinds,:,7) + pws(dinds,:,9);
 uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
 uincs(:,:,8) = pws(dinds,:,1) / zk;
+
+elseif strcmpi(incfield,'pointsource')
+
+uincs = fggreen([-L/2;-L/2],[xxgrid(:) yygrid(:)].',rts,ejs);
+phizinc = uincs(:,:,1)/2;
+phiinc = uincs(:,:,end);
+uincs = uincs(dinds,:,:);
+uincs(:,:,1:end-1) = uincs(:,:,1:end-1)/2;
+
+end
 
 rhs_vec = get_rhs(coefs,uincs);
 coefs(:,:,1:end-1) = 1/2*coefs(:,:,1:end-1);
