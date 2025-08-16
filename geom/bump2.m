@@ -47,7 +47,7 @@ function [icoefs,dinds,pcoefs,H] = bump2(X,Y,amp,width,w,eps)
     icoefs(:,:,6) = 2*ax(dinds);
     icoefs(:,:,7) = 2*ay(dinds);
     icoefs(:,:,8) = -g0*abar(dinds)/a0;
-    icoefs = icoefs*a0 ./ alpha(dinds);
+    icoefs = icoefs * a0 ./ alpha(dinds);
     icoefs = icoefs/E;
 
 end

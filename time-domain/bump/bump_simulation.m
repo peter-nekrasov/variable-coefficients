@@ -5,6 +5,7 @@
 bump_amp = -2.5;
 bump_wid = 75;
 
+incfield = 'linesource';
 srcloc = [-300;-300];
 theta = pi/3;
 
@@ -49,13 +50,26 @@ for ii = 1:nw
     zk = rts((imag(rts) == 0) & (real(rts) > 0));
     ejs = ejs/a0;
 
-    % uincs = green1d(rts,ejs,srcloc,[xxgrid(:) yygrid(:)].',theta);
-    uincs = fggreen(srcloc,[xxgrid(:) yygrid(:)].',rts,ejs);
-    % cnst = max(kerns{1}(:));
-    % kerns = cellfun(@(x) x/cnst,kerns,'UniformOutput',false);
+
+    if strcmpi(incfield,'linesource')
+
+    uincs = green1d(rts,ejs,srcloc,[xxgrid(:) yygrid(:)].',theta);
     phizinc = uincs(:,:,1)/2;
     phiinc = uincs(:,:,end);
-    rhs_vec = get_rhs(coefs,uincs,dinds);
+    uincs = uincs(dinds,:,:);
+    uincs(:,:,1:end-1) = uincs(:,:,1:end-1)/2;
+    
+    elseif strcmpi(incfield,'pointsource')
+    
+    uincs = fggreen([-L/2;-L/2],[xxgrid(:) yygrid(:)].',rts,ejs);
+    phizinc = uincs(:,:,1)/2;
+    phiinc = uincs(:,:,end);
+    uincs = uincs(dinds,:,:);
+    uincs(:,:,1:end-1) = uincs(:,:,1:end-1)/2;
+    
+    end
+
+    rhs_vec = get_rhs(coefs,uincs);
     coefs(:,:,1:end-1) = 1/2*coefs(:,:,1:end-1);
 
     gfunc = @(s,t) fggreen(s,t,rts,ejs);
@@ -66,7 +80,7 @@ for ii = 1:nw
 
     % Solve with GMRES
     start = tic;
-    sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-11,200);
+    sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-6,2000);
     mu = zeros(size(xxgrid));
     mu(dinds) = sol;
     t1 = toc(start);
@@ -93,7 +107,10 @@ for ii = 1:nw
     % title(['\omega = ',ws(ii)]);
     % drawnow
     utots = cat(3,reshape(phiztot,size(xxgrid)),reshape(phitot,size(xxgrid)));
-    [abs_err, rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,50,50,zk,dinds,'fg')
+    [abs_err, rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,50,50,zk,dinds,'fg');
+
+    fprintf('Absolute error (fin diff): %.4e \n',abs_err)
+    fprintf('Relative error (fin diff): %.4e \n',rel_err)
 
     ints_phi(ii,:) = phitot.*gtilde(ws(ii));
     ints_phi_z(ii,:) = phiztot.*gtilde(ws(ii));
@@ -106,7 +123,7 @@ end
 %%
 
 ntimes = 500;
-ts = linspace(-1,6,ntimes);
+ts = linspace(-1,5,ntimes);
 expmat = exp(-1i*ts(:)*ws);
 
 phi_sols = expmat*ints_phi;
@@ -114,11 +131,12 @@ phi_z_sols = expmat*ints_phi_z;
 
 %%
 
-v = VideoWriter('line_source_bump_scattering.mp4', 'MPEG-4');  
+v = VideoWriter('line_source_bump_scattering_2.mp4', 'MPEG-4');  
 v.FrameRate = 30;  % adjust as desired
 open(v);
 
 f = figure('Position',[1 1 1288 544]); clf
+f.Theme = 'light';
 t = tiledlayout(1,2,'TileSpacing','compact');
 
 nexttile(1)

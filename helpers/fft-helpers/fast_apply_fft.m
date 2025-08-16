@@ -1,7 +1,11 @@
-function v = fast_apply_fft(mu,kerns,coefs,iinds,jinds,N)
+function v = fast_apply_fft(mu,kerns,coefs,iinds,jinds,N,idscale)
 
     if size(coefs,3) ~= size(kerns,3)
         error('coefs and kerns must have the same number of pages')
+    end
+
+    if nargin < 7
+        idscale = 1;
     end
 
 
@@ -14,6 +18,6 @@ function v = fast_apply_fft(mu,kerns,coefs,iinds,jinds,N)
     G_mu = ifft2(kerns .* mu_hat);
     G_mu = reshape(G_mu,[N^2,1,size(kerns,3)]);
     G_mu = G_mu(dinds_aug,1,:);
-    v = mu + sum(coefs .* G_mu,3);
+    v = idscale.*mu + sum(coefs .* G_mu,3);
 
 end
