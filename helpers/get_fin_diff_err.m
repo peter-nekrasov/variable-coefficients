@@ -128,6 +128,49 @@ function [err1,err2] = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqt
     err1 = abs(first + second + third + fourth + fifth + sixth + seventh + bterm + gterm) ;
     err2 = err1 / max(abs([first second third fourth fifth sixth seventh bterm gterm]));
 
+    elseif strcmpi(eqtype,'flex')
+
+    % d4 - partial_{xxxx} (6th order) % improve order?
+    d4 = zeros(9,1);
+    d4(1) = 7/240;	
+    d4(2) = -2/5;
+    d4(3) = 169/60;
+    d4(4) = -122/15;
+    d4(5) = 91/8;
+    d4(6) = -122/15;
+    d4(7) = 169/60;
+    d4(8) = -2/5;
+    d4(9) = 7/240;
+    
+    % d2 - partial_{xx} (8th order)
+    d2 = zeros(9, 1);
+    d2(1) = -1/560;
+    d2(2) = 8/315;
+    d2(3) = -1/5;
+    d2(4) = 8/5;
+    d2(5) = -205/72;
+    d2(6) = 8/5;
+    d2(7) = -1/5;
+    d2(8) = 8/315;
+    d2(9) = -1/560;
+    
+    bilap = zeros(9);
+    bilap(:,5) = d4;
+    bilap(5,:) = bilap(5,:) + d4.';
+    bilap = bilap + 2*(d2*d2.');
+    bilap = bilap / h^4;
+
+    minzk4V = zeros(size(X));
+    minzk4V(dinds) = coefs(:,:,1);
+
+    % Residual error of total solution 
+    usub = utots(ii-4:ii+4,jj-4:jj+4);
+    term1 = sum(bilap.*usub,'all');
+    term2 = (-zk^4 + minzk4V(ind))*utots(ii,jj);
+    err1 = abs(term1+term2)  ;
+    err2 = err1 / max(abs([term1 term2]));
+
     end
+
     
 end

@@ -3,35 +3,48 @@
 % Solving the adjointed Lippman-Schwinger equation for the 
 % Helmholtz scattering problem:
 %
-%      \Delta u + k^2 (1 + V(x) ) u = f
+%      \Delta u - k^4 (1 + V(x) ) u = f
 %
-% in this case, f = - k^2 V exp(i k x)
+% in this case, f either corresponds to a plane wave or a point source
 %
 % Solved iteratively using FFT + GMRES 
 %
 %%%%%
 
-L = 10; % length of grid
-N1 = 250; % number of grid points
+incfield = 'pointsource';
+% incfield = 'planewave';
 
-zk = 8;
+L = 20; % length of grid
+N1 = 201; % number of grid points
+
+zk = 2;
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 
 h = xs(2) - xs(1);
 
-[coefs,dinds] = bump(xxgrid,yygrid,-0.5,0.5,1,1e-8);
+[coefs,dinds] = bump(xxgrid,yygrid,1.5,1,1,1e-8);
 V = coefs(:,:,1);
-coefs = coefs*zk^2;
+coefs = -coefs*zk^4;
 
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 fprintf('Number of points: %d \n',size(dinds,1))
 
 % RHS (Incident field)
-theta = -pi/3;
+
+if strcmpi(incfield,'planewave')
+
+theta = -pi/4;
 uinc = planewave(zk,[xxgrid(:) yygrid(:)].',theta);
+
+elseif strcmpi(incfield,'pointsource')
+
+uinc = flexgreen(zk,[-L/3;-L/3],[xxgrid(:) yygrid(:)].');
+
+end
+
 rhs_vec = get_rhs(coefs,uinc,dinds);
 
 figure(1); clf
@@ -57,8 +70,8 @@ drawnow
 
 % Constructing integral operators
 [src,targ,ind,sz,N2] = get_fft_grid(N1,L,0);
-[inds,corrs] = get_correct_helm(h,zk);
-gfunc = @(s,t) helmgreen1(zk,s,t);
+[inds,corrs] = get_correct_flex(h);
+gfunc = @(s,t) flexgreen(zk,s,t);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 % idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
 % kerns = kernmat(src,targ,gfunc,h);
@@ -103,8 +116,20 @@ title('|u|')
 colorbar
        
 % Calculate error with finite difference
-err = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'helm');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'flex');
 
-fprintf('Finite difference error: %.4e \n',err)
+fprintf('Absolute error: %.4e \n',abs_err)
+fprintf('Relative error: %.4e \n',rel_err)
+
+%% specify collection of targets
+
+src = [xxgrid(dinds) yygrid(dinds)].';
+
+ts = linspace(0,2*pi,100);
+targs = 5*[cos(ts) ; sin(ts)];
+
+% smooth quadrature
+kerns = gfunc(src,targs);
+val = kerns*sol*(h^2); % <- scattered field at collection of targets
 
 return
