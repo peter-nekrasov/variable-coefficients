@@ -31,7 +31,8 @@ function [err1,err2] = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqt
     usub = utots(ii-4:ii+4,jj-4:jj+4);
     term1 = sum(lap.*usub,'all');
     term2 = (zk^2 + zk2V(ind))*utots(ii,jj);
-    err1 = abs(term1+term2) / max(abs([term1,term2])) ;
+    err1 = abs(term1+term2) ;
+    err2 = err1 / max(abs([term1,term2])) ;
 
     elseif strcmpi(eqtype,'fg')
 

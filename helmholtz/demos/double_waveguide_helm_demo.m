@@ -155,13 +155,14 @@ colorbar
        
 
 % Calculate error with finite difference
-err = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,L/4,wgdist/2,zk,dinds,'helm');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,L/4,wgdist/2,zk,dinds,'helm');
 
-fprintf('Finite difference error: %.4e \n',err)
+fprintf('Absolute error: %.4e \n',abs_err)
+fprintf('Relative error: %.4e \n',rel_err)
 
 return
 
-%%% solving the waveguide example with FFT + GMRES
+%%% solving the waveguide example with FFT + GMRES (takes way longer)
 
 gfunc = @(s,t) helmgreen1(zk,s,t);
 kerns = kernmat(src,targ,gfunc,h,inds,corrs);

@@ -11,18 +11,17 @@
 %
 %%%%%
 
-L = 1000; % length of grid
-N1 = 150; % number of grid points
+L = 10; % length of grid
+N1 = 200; % number of grid points
 
-zk = 8;
-zk =  0.063360029045643 ;
+zk = 10;
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 
 h = xs(2) - xs(1);
 
-[coefs,dinds] = bump(xxgrid,yygrid,0.25,50,1,1e-12);
+[coefs,dinds] = bump(xxgrid,yygrid,1.25,0.4,1,1e-12);
 V = coefs(:,:,1);
 coefs = coefs*zk^2;
 
@@ -128,8 +127,9 @@ title('|u|')
 colorbar
        
 % Calculate error with finite difference
-err = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'helm');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'helm');
 
-fprintf('Finite difference error: %.4e \n',err)
+fprintf('Absolute error: %.4e \n',abs_err)
+fprintf('Relative error: %.4e \n',rel_err)
 
 return
