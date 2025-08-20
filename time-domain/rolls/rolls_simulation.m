@@ -170,6 +170,15 @@ figure(2); clf
 plot(freqs,real(phizs(:,500)));
 hold on
 plot(freqs,imag(phizs(:,500)));
+xlim([freqs(1) freqs(end)])
+
+figure(3); clf 
+plot(freqs,real(exp(1i*200*freqs).*phizs(:,500).'));
+hold on
+plot(freqs,imag(exp(1i*200*freqs).*phizs(:,500).'));
+title('exp(200i\xi)u(x_0,\xi)')
+xlabel('\xi')
+xlim([freqs(1) freqs(end)])
 
 %%
 
