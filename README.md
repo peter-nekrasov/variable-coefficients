@@ -10,6 +10,10 @@ There is currently support for:
 
 $$ \Delta u + k^2(1+V(x)) u = 0 $$
 
+- Flexural
+
+$$ \Delta u - k^4(1+V(x)) u = 0 $$
+
 - Flexural-Gravity
 
 $$  \Delta( \alpha \Delta) \partial_z \phi + (1 - \nu) \left( 2 \partial_{xy} \alpha \ \partial_{xy} - \partial_x^2 \alpha \ \partial^2_y  - \partial_y^2 \alpha \ \partial_x^2  \right) \partial_z \phi - \beta \partial_z \phi + \gamma \phi = 0  $$
