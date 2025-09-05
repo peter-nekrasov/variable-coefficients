@@ -1,4 +1,4 @@
-Peter's code for solving variable coefficient scattering problems in 2D. The exact form of these scattering problems are below. This code uses the fact that the Lippman-Schwinger equation for each problem looks like an identity term plus the sum of diagonal times translationally invariant operators:
+Peter's code for solving variable coefficient scattering problems in 2D. The exact form of these scattering problems is below. This code uses the fact that the Lippman-Schwinger equation for each problem looks like an identity term plus the sum of diagonal times translationally invariant operators:
 
 $$ \mu(x) + \sum_{i=1}^N V_i(x) \int_{\Omega} K_i (x-y) \mu(y) \ d y  = f(x) $$ 
 
@@ -16,8 +16,8 @@ $$ \Delta u - k^4(1+V(x)) u = 0 $$
 
 - Flexural-Gravity
 
-$$  \frac12 \left( \Delta( \alpha \Delta) + (1-\nu) \left( 2 \partial_{xy} \alpha \ \partial_{xy} - \partial_x^2 \alpha \ \partial^2_y  - \partial_y^2 \alpha \ \partial_x^2  \right)  - \beta \right) u + \gamma \int_{\mathbb{R}^2} \frac{1}{4\pi | x - y \ |} u(y) dy = 0  $$
+$$  \frac12 \left( \Delta( \alpha \Delta) + (1-\nu) \left( 2 \partial_{xy} \alpha \ \partial_{xy} - \partial_x^2 \alpha \ \partial^2_y  - \partial_y^2 \alpha \ \partial_x^2  \right)  - \beta \right) u + \gamma \int_{\Omega} \frac{1}{4\pi | x - y \ |} u(y) dy = 0  $$
 
 
 
-These scattering problems are solved using either FFT + GMRES or using recursive skeletonization with proxy surfaces. The former tends to be faster, but the latter may be better for resonant geometries where GMRES tends to converge slower. 
+These scattering problems are solved using either FFT + GMRES or using recursive skeletonization with proxy surfaces. The former tends to be faster, but the latter may be better for geometries with resonances where GMRES tends to suffer. 
