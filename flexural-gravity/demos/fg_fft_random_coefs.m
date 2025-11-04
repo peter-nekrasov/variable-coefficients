@@ -13,7 +13,7 @@ xs = linspace(-L/2,L/2,N1); % do not change
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-iseed = 180;
+iseed = 200;
 rng(iseed);
 
 zki = 0.4; % 0.25
@@ -171,7 +171,7 @@ title('|\phi_z|')
 colorbar
 
 figure(5); clf
-tiledlayout(1,3)
+tiledlayout(1,3,'TileSpacing','compact','Padding','tight')
 
 nexttile
 pc = pcolor(xxgrid,yygrid,abs(H)); shading interp;
@@ -195,6 +195,6 @@ utots = cat(3,phiztot,phitot);
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
 
-save("random_field" + iseed + ".mat","phiztot","phizinc","phizsca","coefs","pcoefs","H","rel_err","abs_err","flag","relres","iter","resvec")
+save("random_field_" + iseed + ".mat","phiztot","phizinc","phizsca","coefs","pcoefs","H","rel_err","abs_err","flag","relres","iter","resvec")
 
 return
