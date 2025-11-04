@@ -198,6 +198,4 @@ fprintf('Relative error: %.4e \n',rel_err)
 
 save("random_field_" + iseed + ".mat","phiztot","phizsca","coefs","pcoefs","H","rel_err","abs_err","flag","relres","iter","resvec")
 
-return
-
 end
