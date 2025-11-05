@@ -12,7 +12,7 @@ xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-[coefs,dinds,pcoefs] = bump2(xxgrid,yygrid,5,50,8,1e-12);
+[coefs,dinds,pcoefs,rhoi] = bump_variable_rho(xxgrid,yygrid,250,50,8,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 a0 = pcoefs{1}; 
@@ -28,8 +28,8 @@ zk = rts((abs(angle(rts)) < 1e-6) & (real(rts) > 0));
 
 % RHS (Incident field)
 
-incfield = 'pointsource';
-% incfield = 'planewave';
+% incfield = 'pointsource';
+incfield = 'planewave';
 
 if strcmpi(incfield,'planewave')
 
@@ -63,10 +63,9 @@ figure(1); clf
 tiledlayout(2,2);
 
 nexttile
-aplot = pcoefs{1} + pcoefs{2};
-pcolor(xxgrid,yygrid,aplot); shading interp;
+pcolor(xxgrid,yygrid,rhoi); shading interp;
 colorbar
-title('\alpha')
+title('\rho_i')
 drawnow
 
 nexttile
@@ -155,7 +154,7 @@ colorbar
        
 % Calculate error with finite difference
 utots = cat(3,phiztot,phitot);
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg-variable-rho');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
