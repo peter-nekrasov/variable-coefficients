@@ -140,15 +140,15 @@ colorbar
 figure(3); clf
 tiledlayout(2,2)
 
-% nexttile
-% pc = pcolor(xxgrid,yygrid,real(phitot)); shading interp;
-% title('Re(\phi)')
-% colorbar
+nexttile
+pc = pcolor(xxgrid,yygrid,real(phitot)); shading interp;
+title('Re(\phi)')
+colorbar
 
-% nexttile
-% pc = pcolor(xxgrid,yygrid,abs(phitot)); shading interp;
-% title('|\phi|')
-% colorbar
+nexttile
+pc = pcolor(xxgrid,yygrid,abs(phitot)); shading interp;
+title('|\phi|')
+colorbar
 
 nexttile
 pc = pcolor(xxgrid,yygrid,real(phiztot)); shading interp;
