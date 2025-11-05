@@ -213,16 +213,17 @@ function [err1,err2] = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqt
     % Residual error of total solution 
     phi_z_sub = phi_z(ii-4:ii+4,jj-4:jj+4);
     first = alpha.*sum(bilap.*phi_z_sub,'all') ;
-    second = 2*alphax.*sum(gradlapx.*phi_z_sub,'all');
-    third = 2*alphay.*sum(gradlapy.*phi_z_sub,'all');
-    fourth = alphalap.*sum(lap.*phi_z_sub,'all');
-    fifth = -(1-nu)*alphayy.*sum(hessxx.*phi_z_sub,'all');
-    sixth = -(1-nu)*alphaxx.*sum(hessyy.*phi_z_sub,'all');
-    seventh = 2*(1-nu)*alphaxy.*sum(hessxy.*phi_z_sub,'all');
+    % second = 2*alphax.*sum(gradlapx.*phi_z_sub,'all');
+    % third = 2*alphay.*sum(gradlapy.*phi_z_sub,'all');
+    % fourth = alphalap.*sum(lap.*phi_z_sub,'all');
+    % fifth = -(1-nu)*alphayy.*sum(hessxx.*phi_z_sub,'all');
+    % sixth = -(1-nu)*alphaxx.*sum(hessyy.*phi_z_sub,'all');
+    % seventh = 2*(1-nu)*alphaxy.*sum(hessxy.*phi_z_sub,'all');
     bterm = -beta(ii,jj).*phi_z(ii,jj);
     gterm = g0.*phi(ii,jj);
-    err1 = abs(first + second + third + fourth + fifth + sixth + seventh + bterm + gterm) ;
-    err2 = err1 / max(abs([first second third fourth fifth sixth seventh bterm gterm]));
+    % err1 = abs(first + second + third + fourth + fifth + sixth + seventh + bterm + gterm) ;
+    err1 = abs(first + bterm + gterm) ;
+    err2 = err1 / max(abs([first  bterm gterm]));
 
     elseif strcmpi(eqtype,'flex')
 

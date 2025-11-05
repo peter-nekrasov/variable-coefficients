@@ -118,19 +118,19 @@ spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 kerns = kernmat(src,targ,gfunc,h,inds,corrs);
 kerns = gen_fft_kerns(kerns,sz,ind);
 
-% evalkerns = kerns(:,:,[1,8]);
-% evalspmats = {spmats{1},spmats{8}};
+evalkerns = kerns(:,:,[1,8]);
+evalspmats = {spmats{1},spmats{8}};
 
 % usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
 usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 phizsca = usca(:,:,1)/2;
-% phisca = usca(:,:,2);
+phisca = usca(:,:,2);
 
 phiztot = phizsca + phizinc;
-% phitot = phisca + phiinc;
+phitot = phisca + phiinc;
 
 phiztot = reshape(phiztot,size(xxgrid));
-% phitot = reshape(phitot,size(xxgrid));
+phitot = reshape(phitot,size(xxgrid));
 
 figure(2);
 pc = pcolor(xxgrid,yygrid,real(mu)); shading interp;
