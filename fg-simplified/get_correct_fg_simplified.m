@@ -1,4 +1,4 @@
-function [inds, corrs] = get_correct_fg_variable_rho(h,a0)
+function [inds, corrs] = get_correct_fg_simplified(h,a0)
 % Getting corrections for the kernels in the Lippman-Schwinger eq
 %
 % input:
