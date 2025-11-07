@@ -13,7 +13,7 @@ xs = linspace(-L/2,L/2,N1); % do not change
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-for iseed = 1:10000
+for iseed = 3000:10000
 
 rng(iseed);
 
@@ -196,6 +196,6 @@ utots = cat(3,phiztot,phitot);
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
 
-save("random_field_" + iseed + ".mat","phiztot","phizsca","coefs","pcoefs","H","rel_err","abs_err","flag","relres","iter","resvec")
+save("random_field_" + iseed + ".mat","phiztot","lapphiztot","phizsca","coefs","pcoefs","H","rel_err","abs_err","flag","relres","iter","resvec")
 
 end
