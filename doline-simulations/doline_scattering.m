@@ -6,6 +6,8 @@ end
 
 function doline_scattering_1(w,ii)
 
+disp(ii)
+
 L = 2000; % length of grid
 N1 = 400; % number of grid points
 
@@ -167,6 +169,6 @@ utots = cat(3,phiztot,phitot);
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
 
-save("doline_scattering_" + ii + ".mat", "sol","mu","w","ii","phizsca","phisca","flag","relres","iter","resvec","a0","b0","g0","pcoefs","xxgrid","yygrid","H","phiztot","phitot")
+save("doline_scattering_" + ii + ".mat", "sol","mu","w","ii","phizsca","phisca","flag","relres","iter","resvec","a0","b0","g0","pcoefs","xxgrid","yygrid","H","phiztot","phitot", "abs_err","rel_err" )
 
 end
