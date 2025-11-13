@@ -3,14 +3,16 @@ load("average_field_1.mat")
 
 t = tiledlayout(1,2,"TileSpacing","compact");
 nexttile
-pcolor(xxgrid,yygrid,phizavg,'EdgeColor','none')
+pcolor(xxgrid,yygrid,log10(phizavg),'EdgeColor','none')
 colorbar
-title("|\phi_z|^2")
+title("log_{10}|\phi_z|^2")
 
 nexttile
-pcolor(xxgrid,yygrid,lapphizavg,'EdgeColor','none')
+pcolor(xxgrid,yygrid,log10(lapphizavg),'EdgeColor','none')
 colorbar
-title("|\Delta\phi_z|^2")
+title("log_{10}|\Delta\phi_z|^2")
+
+%%
 
 figure(2); clf;
 load("random_field_3671.mat")
@@ -30,3 +32,11 @@ nexttile
 pcolor(xxgrid,yygrid,abs(lapphiztot),'EdgeColor','none')
 colorbar
 title("|\Delta\phi_z|")
+
+
+%%
+
+inds = (yygrid < 1) & (yygrid > 0) ; %& (xxgrid > 0);
+
+xx = xxgrid(inds); phizslice = phizavg(inds);
+plot(xx, (phizslice));
