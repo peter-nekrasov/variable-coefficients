@@ -1,7 +1,4 @@
-function val = flexgreen(zk,src,targ)
-
-val = hkdiffgreen(zk,src,targ);
-val = 1/(2*zk^2)*val;
+function [val,grad] = flexgreen(zk,src,targ)
 
 [~,ns] = size(src);
 [~,nt] = size(targ);
@@ -12,13 +9,19 @@ ys = repmat(src(2,:),nt,1);
 xt = repmat(targ(1,:).',1,ns);
 yt = repmat(targ(2,:).',1,ns);
 
-dx = xt-xs;
-dy = yt-ys;
+r2 = (xt-xs).^2 + (yt-ys).^2;
 
-dx2 = dx.*dx;
-dy2 = dy.*dy;
-r2 = dx2 + dy2;
+if nargout == 1
+val = hkdiffgreen(zk,src,targ);
+val = 1/(2*zk^2)*val;
 
 val(r2 < 1e-8) = 1/(2*zk^2)*hkdiffgreen(zk,[0;0],[0;1e-8]);
+elseif nargout == 2
+[val,grad] = hkdiffgreen(zk,src,targ);
+val = 1/(2*zk^2)*val;
+grad = 1/(2*zk^2)*grad;
+
+val(r2 < 1e-8) = 1/(2*zk^2)*hkdiffgreen(zk,[0;0],[0;1e-8]);
+end
 
 end
