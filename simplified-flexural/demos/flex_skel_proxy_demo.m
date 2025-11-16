@@ -11,8 +11,8 @@
 %
 %%%%%
 
-incfield = 'pointsource';
-% incfield = 'planewave';
+% incfield = 'pointsource';
+incfield = 'planewave';
 
 L = 20; % length of grid
 N1 = 201; % number of grid points

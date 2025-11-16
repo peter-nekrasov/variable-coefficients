@@ -1,7 +1,7 @@
 %%%%%
 %
 % Solving the adjointed Lippman-Schwinger equation for the 
-% Helmholtz scattering problem:
+% simplified flexural scattering problem:
 %
 %      \Delta^2 u - k^4 (1 + V(x) ) u = f
 %
@@ -11,26 +11,20 @@
 %
 %%%%%
 
-% incfield = 'pointsource';
+incfield = 'pointsource';
 % incfield = 'planewave';
-incfield = 'beam';
 
-L = 10; % length of grid
-N1 = 400; % number of grid points
+L = 20; % length of grid
+N1 = 401; % number of grid points
 
-zk = 10;
+zk = 2;
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 
 h = xs(2) - xs(1);
 
-wgdist = 2+(2*pi/zk);
-wglen = 0.9*L;
-wgamp = (3^4-1); % 0.25
-wgwid = 0.1*L;
-
-[coefs,dinds] = double_waveguide(xxgrid,yygrid,L,wgamp,wglen,wgwid,wgdist,0.08,1e-8);
+[coefs,dinds] = bump(xxgrid,yygrid,1.5,1,1,1e-8);
 V = coefs(:,:,1);
 coefs = -coefs*zk^4;
 
@@ -47,20 +41,9 @@ uinc = planewave(zk,[xxgrid(:) yygrid(:)].',theta);
 
 elseif strcmpi(incfield,'pointsource')
 
-uinc = flexgreen(zk,[-L/2;-1/2*wgdist],[xxgrid(:) yygrid(:)].');
-
-elseif strcmpi(incfield,'beam')
-
-k1 = zk;
-k2 = 0;
-src = []; src.r = [-L/2;-1/2*wgdist] + 1.5i*[1;0];
-targ = []; targ.r = [xxgrid(:) yygrid(:)].';
-uinc = helmgreen1(zk,src.r,targ.r) + helmgreen1(1i*zk,src.r,targ.r);
-uinc = uinc / max(abs(uinc(:)));
+uinc = flexgreen(zk,[-L/3;-L/3],[xxgrid(:) yygrid(:)].');
 
 end
-
-
 
 rhs_vec = get_rhs(coefs,uinc,dinds);
 
@@ -98,7 +81,7 @@ kerns = gen_fft_kerns(kerns,sz,ind);
 % Solve with GMRES
 start = tic;
 % sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,idspmats,iinds,jinds,N2),rhs_vec,[],1e-10,200);
-sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-6,5000);
+sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-10,200);
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;
 t1 = toc(start);
@@ -138,8 +121,6 @@ colorbar
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
 
-return 
-
 %% specify collection of targets
 
 src = [xxgrid(dinds) yygrid(dinds)].';
@@ -150,3 +131,5 @@ targs = 5*[cos(ts) ; sin(ts)];
 % smooth quadrature
 kerns = gfunc(src,targs);
 val = kerns*sol*(h^2); % <- scattered field at collection of targets
+
+return

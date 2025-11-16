@@ -129,7 +129,7 @@ function [err1,err2] = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqt
     err1 = abs(first + second + third + fourth + fifth + sixth + seventh + bterm + gterm) ;
     err2 = err1 / max(abs([first second third fourth fifth sixth seventh bterm gterm]));
 
-    elseif strcmpi(eqtype,'flex')
+    elseif strcmpi(eqtype,'flex-simplified')
 
     % d4 - partial_{xxxx} (6th order) % improve order?
     d4 = zeros(9,1);

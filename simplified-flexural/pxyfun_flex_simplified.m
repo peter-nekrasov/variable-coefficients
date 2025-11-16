@@ -1,4 +1,4 @@
-function [Kpxy,nbr] = pxyfun_flex(x,slf,nbr,l,ctr,quads,zk,V)
+function [Kpxy,nbr] = pxyfun_flex_simplified(x,slf,nbr,l,ctr,quads,zk,V)
 % PXYFUN(X,SLF,NBR,L,CTR) computes interactions between the points
 % X(:,SLF) and the set of proxy points by scaling the proxy sphere to 
 % appropriately contain a box at level L centered at CTR and then
