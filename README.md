@@ -12,7 +12,7 @@ $$ \Delta u + k^2(1+V(x)) u = 0 $$
 
 - Simplified Flexural
 
-$$ \Delta u - k^4(1+V(x)) u = 0 $$
+$$ \Delta^2 u - k^4(1+V(x)) u = 0 $$
 
 - Flexural-Gravity
 
