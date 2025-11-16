@@ -10,7 +10,7 @@ There is currently support for:
 
 $$ \Delta u + k^2(1+V(x)) u = 0 $$
 
-- Flexural
+- Simplified Flexural
 
 $$ \Delta u - k^4(1+V(x)) u = 0 $$
 
