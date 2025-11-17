@@ -5,7 +5,8 @@
 %
 %      \Delta^2 u - k^4 (1 + V(x) ) u = f
 %
-% in this case, f either corresponds to a plane wave or a point source
+% in this case, f either corresponds to a plane wave, point source, or a
+% Gaussian beam
 %
 % Solved iteratively using FFT + GMRES 
 %
@@ -59,8 +60,6 @@ uinc = helmgreen1(zk,src.r,targ.r) + helmgreen1(1i*zk,src.r,targ.r);
 uinc = uinc / max(abs(uinc(:)));
 
 end
-
-
 
 rhs_vec = get_rhs(coefs,uinc,dinds);
 

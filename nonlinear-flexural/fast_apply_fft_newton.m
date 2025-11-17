@@ -1,4 +1,4 @@
-function v = fast_apply_fft_nonlinear_flex(delta_mu_k,u_k,zk,a0,a1,kerns,coefs,iinds,jinds,N)
+function v = fast_apply_fft_newton(delta_mu_k,u_k,zk,a0,a1,kerns,coefs,iinds,jinds,N)
 
     if size(coefs,3) ~= size(kerns,3)
         error('coefs and kerns must have the same number of pages')
