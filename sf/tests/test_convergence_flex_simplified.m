@@ -64,7 +64,7 @@ utot = usca + uinc;
 utot = reshape(utot,size(xxgrid));
 
 mus(ii) = mu((N1-1)/2+1,(N1-1)/2+1);
-errs(ii) = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'flex-simplified');
+errs(ii) = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'sf');
 
 end
 

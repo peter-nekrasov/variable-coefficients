@@ -12,7 +12,7 @@ xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-[coefs,dinds,pcoefs,rhoi] = bump_variable_rho2(xxgrid,yygrid,250,50,8,1e-12);
+[coefs,dinds,pcoefs,rhoi] = bump_variable_rho2(xxgrid,yygrid,5000,50,8,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 a0 = pcoefs{1}; 
@@ -93,8 +93,8 @@ drawnow
 
 % Constructing integral operators
 [src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
-[inds,corrs] = get_correct_fg_variable_rho(h,a0);
-gfunc = @(s,t) fggreen2(s,t,rts,ejs);
+[inds,corrs] = get_correct_sfg(h,a0);
+gfunc = @(s,t) fggreenonly(s,t,rts,ejs);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
 %kerns = kernmat(src,targ,gfunc,h);
@@ -162,7 +162,7 @@ colorbar
        
 % Calculate error with finite difference
 utots = cat(3,phiztot,phitot);
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg-variable-rho');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'sfg');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
