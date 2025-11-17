@@ -16,7 +16,7 @@ $$ \Delta^2 u - k^4(1+V(x)) u = 0 $$
 
 - Simplified Flexural-Gravity (sfg):
 
-$$ \alpha  \Delta^2 \partial_z\phi - \beta (1+V) \partial_z\phi + \gamma \phi = 0 $$
+$$ \frac{\alpha}{2}  \Delta^2 u - \frac{\beta}{2} (1+V) u  + \gamma \int_{\Omega} \frac{1}{4\pi | x - y \ |} u(y) dy = 0 $$
 
 - Flexural-Gravity (flex-gravity):
 
