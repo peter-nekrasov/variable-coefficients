@@ -1,4 +1,4 @@
-Peter's code for solving variable coefficient scattering problems in 2D. The exact form of these scattering problems is below. This code uses the fact that the Lippman-Schwinger equation for each problem looks like an identity term plus the sum of diagonal times translationally invariant operators:
+Peter's repository for solving variable coefficient scattering problems in 2D. The exact form of these scattering problems is below. This code uses the fact that the (adjoint) Lippman-Schwinger equation for each problem looks like an identity term plus the sum of diagonal times translationally invariant operators:
 
 $$ \mu(x) + \sum_{i=1}^N V_i(x) \int_{\Omega} K_i (x-y) \mu(y) \ d y  = f(x) $$ 
 
