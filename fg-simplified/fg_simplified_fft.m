@@ -12,7 +12,7 @@ xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-[coefs,dinds,pcoefs] = bump2(xxgrid,yygrid,5,50,8,1e-12);
+[coefs,dinds,pcoefs,rhoi] = bump_variable_rho2(xxgrid,yygrid,250,50,8,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 a0 = pcoefs{1}; 
@@ -28,8 +28,8 @@ zk = rts((abs(angle(rts)) < 1e-6) & (real(rts) > 0));
 
 % RHS (Incident field)
 
-incfield = 'pointsource';
-% incfield = 'planewave';
+% incfield = 'pointsource';
+incfield = 'planewave';
 
 if strcmpi(incfield,'planewave')
 
@@ -38,13 +38,13 @@ pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
 phizinc = pws(:,:,1);
 phiinc = pws(:,:,1) / zk;
 
-uincs = zeros([size(dinds) 8]);
+uincs = zeros([size(dinds) 1]);
 uincs(:,:,1) = pws(dinds,:,1);
-uincs(:,:,2:4) = pws(dinds,:,4:6);
-uincs(:,:,5) = pws(dinds,:,4) + pws(dinds,:,6);
-uincs(:,:,6) = pws(dinds,:,7) + pws(dinds,:,9);
-uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
-uincs(:,:,8) = pws(dinds,:,1) / zk;
+% uincs(:,:,2:4) = pws(dinds,:,4:6);
+% uincs(:,:,5) = pws(dinds,:,4) + pws(dinds,:,6);
+% uincs(:,:,6) = pws(dinds,:,7) + pws(dinds,:,9);
+% uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
+% uincs(:,:,8) = pws(dinds,:,1) / zk;
 
 elseif strcmpi(incfield,'pointsource')
 
@@ -57,16 +57,15 @@ uincs(:,:,1:end-1) = uincs(:,:,1:end-1)/2;
 end
 
 rhs_vec = get_rhs(coefs,uincs);
-coefs(:,:,1:end-1) = coefs(:,:,1:end-1)/2;
+coefs = coefs/2;
 
 figure(1); clf
 tiledlayout(2,2);
 
 nexttile
-aplot = pcoefs{1} + pcoefs{2};
-pcolor(xxgrid,yygrid,aplot); shading interp;
+pcolor(xxgrid,yygrid,rhoi); shading interp;
 colorbar
-title('\alpha')
+title('\rho_i')
 drawnow
 
 nexttile
@@ -94,8 +93,8 @@ drawnow
 
 % Constructing integral operators
 [src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
-[inds,corrs] = get_correct_fg(h,a0);
-gfunc = @(s,t) fggreen(s,t,rts,ejs);
+[inds,corrs] = get_correct_fg_variable_rho(h,a0);
+gfunc = @(s,t) fggreen2(s,t,rts,ejs);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
 %kerns = kernmat(src,targ,gfunc,h);
@@ -110,6 +109,14 @@ mu = zeros(size(xxgrid));
 mu(dinds) = sol;
 t1 = toc(start);
 fprintf('%5.2e s : time to solve\n',t1)
+
+[inds,corrs] = get_correct_fg(h,a0);
+gfunc = @(s,t) fggreen(s,t,rts,ejs);
+spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
+% idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
+%kerns = kernmat(src,targ,gfunc,h);
+kerns = kernmat(src,targ,gfunc,h,inds,corrs);
+kerns = gen_fft_kerns(kerns,sz,ind);
 
 evalkerns = kerns(:,:,[1,8]);
 evalspmats = {spmats{1},spmats{8}};
@@ -155,7 +162,7 @@ colorbar
        
 % Calculate error with finite difference
 utots = cat(3,phiztot,phitot);
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg-variable-rho');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
