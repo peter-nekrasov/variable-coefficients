@@ -10,11 +10,15 @@ There is currently support for:
 
 $$ \Delta u + k^2(1+V(x)) u = 0 $$
 
-- Simplified Flexural
+- Simplified Flexural (sf)
 
 $$ \Delta^2 u - k^4(1+V(x)) u = 0 $$
 
-- Flexural-Gravity
+- Simplified Flexural-Gravity (sfg)
+
+$$ \alpha  \Delta^2 \partial_z\phi - \beta (1+V) \partial_z\phi + \gamma \phi = 0 $$
+
+- Flexural-Gravity (flex-gravity)
 
 $$  \frac12 \left( \Delta( \alpha \Delta) + (1-\nu) \left( 2 \partial_{x_1 x_2} \alpha \ \partial_{x_1 x_2} - \partial_{x_1}^2 \alpha \ \partial^2_{x_2}  - \partial_{x_2}^2 \alpha \ \partial_{x_1}^2  \right)  - \beta \right) u + \gamma \int_{\Omega} \frac{1}{4\pi | x - y \ |} u(y) dy = 0  $$
 
