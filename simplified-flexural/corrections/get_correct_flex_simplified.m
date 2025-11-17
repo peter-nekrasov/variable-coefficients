@@ -1,4 +1,4 @@
-function [inds, corrs] = get_correct_flex(h)
+function [inds, corrs] = get_correct_flex_simplified(h)
 % Getting corrections for the kernels in the Lippman-Schwinger eq
 %
 % input:

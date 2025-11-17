@@ -87,7 +87,7 @@ drawnow
 
 % Constructing integral operators
 [src,targ,ind,sz,N2] = get_fft_grid(N1,L,0);
-[inds,corrs] = get_correct_flex(h);
+[inds,corrs] = get_correct_flex_simplified(h);
 gfunc = @(s,t) flexgreen(zk,s,t);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 % idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
@@ -133,10 +133,12 @@ title('|u|')
 colorbar
        
 % Calculate error with finite difference
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'flex');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'flex-simplified');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
+
+return 
 
 %% specify collection of targets
 
@@ -148,5 +150,3 @@ targs = 5*[cos(ts) ; sin(ts)];
 % smooth quadrature
 kerns = gfunc(src,targs);
 val = kerns*sol*(h^2); % <- scattered field at collection of targets
-
-return

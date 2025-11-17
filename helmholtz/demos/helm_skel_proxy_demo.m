@@ -12,7 +12,7 @@
 %%%%%
 
 L = 10; % length of grid
-N1 = 200; % number of grid points
+N1 = 400; % number of grid points
 
 zk = 10;
 
@@ -92,7 +92,7 @@ fprintf('%5.2e s : time to solve (skel) \n',t3)
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;
 
-%% Plot with FFT
+% Plot with FFT
 
 [src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
 kerns = kernmat(src,targ,@(s,t) helmgreen1(zk,s,t),h);
