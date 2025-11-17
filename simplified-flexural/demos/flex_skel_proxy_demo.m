@@ -11,8 +11,8 @@
 %
 %%%%%
 
-incfield = 'pointsource';
-% incfield = 'planewave';
+% incfield = 'pointsource';
+incfield = 'planewave';
 
 L = 20; % length of grid
 N1 = 201; % number of grid points
@@ -69,29 +69,52 @@ title('rhs')
 drawnow
 
 % Constructing integral operators
-[src,targ,ind,sz,N2] = get_fft_grid(N1,L,0);
-[inds,corrs] = get_correct_flex(h);
-gfunc = @(s,t) flexgreen(zk,s,t);
+[inds,corrs] = get_correct_flex_simplified(h);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
-% idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
-% kerns = kernmat(src,targ,gfunc,h);
-kerns = kernmat(src,targ,gfunc,h,inds,corrs);
-kerns = gen_fft_kerns(kerns,sz,ind);
+idspmat = id_plus_corr_sum(coefs,spmats,dinds,h);
 
-% Solve with GMRES
+% Defining integral operators
+
+srcinfo = []; srcinfo.r = [xxgrid(dinds) yygrid(dinds)].'; srcinfo.wts = h^2*ones(length(dinds),1);
+targinfo = []; targinfo.r = srcinfo.r; 
+
+gfunc = @(s,t) flexgreen(zk,s.r,t.r);
+Afun = @(i,j) kern_matgen(i,j,srcinfo,targinfo,coefs,gfunc,idspmat);
+
+% Solve with FLAM
+
+quads = srcinfo.wts;
+pxyf = @(x,slf,nbr,l,ctr)  pxyfun_flex_simplified(x,slf,nbr,l,ctr,quads,zk,V);
+
+rs          = srcinfo.r;
+occ         = 2048;
+rank_or_tol = 1E-8;
+opts        = [];
+
 start = tic;
-% sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,idspmats,iinds,jinds,N2),rhs_vec,[],1e-10,200);
-sol = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],1e-10,200);
+F = rskelf(Afun,rs,occ,rank_or_tol,pxyf,opts);
+t2 = toc(start);
+fprintf('%5.2e s : time to factorize inverse (skel) \n',t2)
+
+start = tic;
+sol = rskelf_sv(F,rhs_vec);
+t3 = toc(start);
+fprintf('%5.2e s : time to solve (skel) \n',t3)
+
 mu = zeros(size(xxgrid));
 mu(dinds) = sol;
-t1 = toc(start);
-fprintf('Time to solve: %5.2e s\n',t1)
+
+% Plot with FFT
+
+[src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
+kerns = kernmat(src,targ,@(s,t) flexgreen(zk,s,t),h);
+kerns = gen_fft_kerns(kerns,sz,ind);
 
 evalkerns = kerns(:,:,1);
 evalspmats = {spmats{1}};
 
-% usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
-usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
+usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
+% usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 usca = usca(:,:,1);
 
 utot = usca + uinc;
@@ -116,20 +139,9 @@ title('|u|')
 colorbar
        
 % Calculate error with finite difference
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'flex');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'flex-simplified');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
-
-%% specify collection of targets
-
-src = [xxgrid(dinds) yygrid(dinds)].';
-
-ts = linspace(0,2*pi,100);
-targs = 5*[cos(ts) ; sin(ts)];
-
-% smooth quadrature
-kerns = gfunc(src,targs);
-val = kerns*sol*(h^2); % <- scattered field at collection of targets
 
 return
