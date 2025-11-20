@@ -17,10 +17,11 @@ a0 = 1;
 a1 = 0.5;
 zk = 4;
 
-step_size = 0.001;
+step_size1 = 0.01;
+step_size2 = 0.0001;
 
 L = 10; % length of grid
-N1 = 250; % number of grid points
+N1 = 800; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
@@ -93,27 +94,40 @@ kerns = gen_fft_kerns(kerns,sz,ind);
 mu_k = zeros(size(dinds));
 utot_k = zeros(size(dinds));
 
-as = 0:step_size:a1;
-
 evalkerns = kerns(:,:,1);
 evalspmats = {spmats{1}};
 
 % rhs_pde = zk.^4*coefs.*(a0 + a1*uinc(dinds,:,:).*conj(uinc(dinds,:,:))).*uinc(dinds,:,:);
 
-for ii = 1:numel(as)
+tol = 1e-6;
 
-a1_k = as(ii)
+a1_k = 0;
+
+step_size1 = 0.01;
+step_size2 = 0.0001;
+
+step_size = step_size1;
+a1vec = [];
+itervec = [];
+rescell = {};
+
+while a1_k <= a1
+
+fprintf("a1 = %f. \n",a1_k)
 
 ie_resid = 1;
+iter = 0;
 
-if ii == numel(as)
-    tol = 1e-8;
-else
-    tol = 1e-6;
+resvec = vecnorm(mu_k - zk^4*V.*(a0 + a1_k*(utot_k).*conj(utot_k)).*utot_k) / vecnorm(mu_k) ;
+
+if a1_k > 0.1999999
+    step_size = step_size2;
 end
 
-while vecnorm(ie_resid) > tol
+while (ie_resid) > tol
 
+iter = iter + 1;
+   
 rhs_vec = zk^4*V.*(a0 + a1_k*(utot_k).*conj(utot_k)).*uinc(dinds,:,:)  ;
 rhsnorm = vecnorm(rhs_vec);
 
@@ -122,7 +136,7 @@ coefs = -zk.^4*V.*(a0+a1_k.*utot_k.*conj(utot_k));
 % Solve with GMRES
 start = tic;
 % sol = gmres(@(mu) fast_apply_fft_sub(mu,kerns,coefs,idspmats,iinds,jinds,N2),rhs_vec,[],1e-10,200);
-mu_k = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],tol*1e-2,5000,[],[],mu_k);
+[mu_k,flag] = gmres(@(mu) fast_apply_fft(mu,kerns,coefs,iinds,jinds,N2),rhs_vec,[],tol*1e-2,5000,[],[],mu_k);
 t1 = toc(start);
 
 % usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
@@ -131,15 +145,32 @@ u_k = u_k(dinds,:,1);
 utot_k = u_k + uinc(dinds,:,:);
 
 ie_resid = mu_k - zk^4*V.*(a0 + a1_k*(utot_k).*conj(utot_k)).*utot_k ;
-ie_resid = ie_resid / vecnorm(mu_k);
+ie_resid = vecnorm(ie_resid) / vecnorm(mu_k);
+
+if flag == 0
+    fprintf("Iteration %d. GMRES converged. Integral equation residual: %.3e \n",iter,ie_resid)
+else
+    fprintf("GMRES failed to converge. \n")
+end
+
+resvec = [resvec ie_resid];
 
 end
 
-if ii == 1
+itervec = [itervec iter];
+a1vec = [a1vec a1_k];
+rescell{end+1} = resvec;
+
+
+if a1_k == 0
     usca = sol_eval_fft(mu_k,evalkerns,iinds,jinds,N1,N2);
     ulin = usca + uinc;
     ulin = reshape(ulin,size(xxgrid));
 end
+
+mu_k_prev = mu_k;
+a1_k_prev = a1_k;
+a1_k = a1_k + step_size;
 
 end
 
@@ -162,8 +193,9 @@ tiledlayout(2,2)
 % colorbar
 
 nexttile
-pc = pcolor(xxgrid,yygrid,real(ulin)); shading interp;
-title('Re(u), \alpha_1 = 0')
+pc = pcolor(xxgrid,yygrid,imag(ulin)); shading interp;
+title('Im(u), \alpha_1 = 0')
+clim([-1 1])
 colorbar
 
 nexttile
@@ -177,8 +209,9 @@ colorbar
 % colorbar
 
 nexttile
-pc = pcolor(xxgrid,yygrid,real(utot)); shading interp;
-title("Re(u), \alpha_1 = " + a1)
+pc = pcolor(xxgrid,yygrid,imag(utot)); shading interp;
+title("Im(u), \alpha_1 = " + a1)
+clim([-1 1])
 colorbar
 
 nexttile
