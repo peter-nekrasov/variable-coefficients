@@ -14,13 +14,13 @@
 incfield = 'beam';
 
 a0 = 1;
-a1 = 1;
-zk = 3;
+a1 = 2;
+zk = 4;
 
 step_size = 0.1;
 
 L = 10; % length of grid
-N1 = 400; % number of grid points
+N1 = 500; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
@@ -106,7 +106,7 @@ a1vec = [];
 itervec = [];
 rescell = {};
 
-while a1_k <= a1
+while a1_k < a1
 
 fprintf("a1 = %f. \n",a1_k)
 
@@ -177,6 +177,7 @@ rescell{end+1} = resvec;
 
 if a1_k == 0
     usca = sol_eval_fft(mu_k,evalkerns,iinds,jinds,N1,N2);
+    mulin = mu_k;
     ulin = usca + uinc;
     ulin = reshape(ulin,size(xxgrid));
 end
@@ -197,6 +198,9 @@ usca = sol_eval_fft(mu_k,evalkerns,iinds,jinds,N1,N2);
 
 utot = usca + uinc;
 utot = reshape(utot,size(xxgrid));
+
+save("flex_nonlinear_waveguide_" + zk + "_" + a1 + ".mat","a0","a1","zk","a1_k","xxgrid","yygrid","coefs","V","uinc","a1vec","itervec","rescell","mu_k","usca","utot","mu_tot","ulin","mu_lin")
+
 
 figure(2);
 tiledlayout(2,2)
@@ -225,20 +229,20 @@ colorbar
 
 nexttile
 pc = pcolor(xxgrid,yygrid,real(utot)); shading interp;
-title("Re(u), \alpha_1 = " + a1)
+title("Re(u), \alpha_1 = " + a1_k)
 clim([-0.9 0.9])
 colorbar
 
 nexttile
 pc = pcolor(xxgrid,yygrid,abs(utot)); shading interp;
-title("|u|, \alpha_1 = " + a1)
+title("|u|, \alpha_1 = " + a1_k)
 clim([0 1.2])
 colorbar
        
 % Calculate error with finite difference
 
-pdecoef = -zk^4*Vtot.*(a0 + a1*utot.*conj(utot));
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,pdecoef,1,-2.5,zk,dinds,'flex-nonlinear');
+pdecoef = -zk^4*Vtot.*(a0 + a1_k*utot.*conj(utot));
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,pdecoef,1,-2,zk,dinds,'flex-nonlinear');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
