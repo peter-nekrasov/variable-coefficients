@@ -13,7 +13,7 @@ function [icoefs,dinds,pcoefs,H] = doline(X,Y,amp,width1,width2,w,eps)
     gbar = 0;
 
     R = sqrt(X.^2 + Y.^2);
-    Hbar = amp.*(R < width1) + (amp + amp.*(width1 - R)/(width2 - width1)) .* (R < width2) .* (R > width1);
+    Hbar = amp.*(R <= width1) + (amp + amp.*(width1 - R)/(width2 - width1)) .* (R < width2) .* (R > width1);
     H = H0 + Hbar;
 
     dHdR = (-amp/(width2 - width1)) .* (R < width2) .* (R > width1);
@@ -24,6 +24,12 @@ function [icoefs,dinds,pcoefs,H] = doline(X,Y,amp,width1,width2,w,eps)
     d2RdX2 = R.^(-1) - X.^2.*R.^(-3);
     d2RdY2 = R.^(-1) - Y.^2.*R.^(-3);
     d2RdXdY = -X.*Y.*R.^(-3);
+
+    dRdX(R == 0) = 0;
+    dRdY(R == 0) = 0;
+    d2RdX2(R == 0) = 0;
+    d2RdY2(R == 0) = 0;
+    d2RdXdY(R == 0) = 0;
 
     alpha = E*H.^3/(12*(1-nu^2));
     beta = (rhoi*H*w^2 - rhow*g);

@@ -1,5 +1,5 @@
 L = 2000; % length of grid
-N1 = 400; % number of grid points
+N1 = 301; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
@@ -23,8 +23,8 @@ zk = rts((abs(angle(rts)) < 1e-6) & (real(rts) > 0));
 
 % RHS (Incident field)
 
-incfield = 'pointsource';
-% incfield = 'planewave';
+% incfield = 'pointsource';
+incfield = 'planewave';
 
 if strcmpi(incfield,'planewave')
 
