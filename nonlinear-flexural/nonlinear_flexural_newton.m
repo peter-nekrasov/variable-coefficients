@@ -77,7 +77,7 @@ nexttile
 uincplot = reshape(uinc,size(xxgrid));
 pcolor(xxgrid,yygrid,real(uincplot)); shading interp;
 colorbar
-title('rhs')
+title('Incident field')
 drawnow
 
 % Constructing integral operators
@@ -201,6 +201,8 @@ utot = reshape(utot,size(xxgrid));
 
 save("flex_nonlinear_waveguide_" + zk + "_" + a1 + ".mat","a0","a1","zk","a1_k","xxgrid","yygrid","coefs","V","uinc","a1vec","itervec","rescell","mu_k","usca","utot","mu_tot","ulin","mu_lin")
 
+
+%% 
 
 figure(2);
 tiledlayout(2,2)
