@@ -26,7 +26,7 @@ g0 = pcoefs{5};
 fprintf('Number of points: %d \n',size(dinds,1))
 
 % Finding positive real roots
-zk = (-b0/a0)^0.25;
+zk = (b0/a0)^0.25;
 
 % RHS (Incident field)
 
@@ -130,7 +130,7 @@ title('Re(\mu)')
 colorbar
 
 figure(3); clf
-tiledlayout(2,2)
+tiledlayout(1,2)
 
 nexttile
 pc = pcolor(xxgrid,yygrid,real(utot)); shading interp;
