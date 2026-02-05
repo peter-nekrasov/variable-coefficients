@@ -344,7 +344,7 @@ function [err1,err2] = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqt
     nu = coefs{end};
     alphalap = alphaxx + alphayy;
 
-    phi_z = utots(:,:,1);
+    phi_z = utots;
     
     % Residual error of total solution 
     phi_z_sub = phi_z(ii-4:ii+4,jj-4:jj+4);

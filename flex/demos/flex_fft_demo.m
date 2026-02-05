@@ -120,9 +120,9 @@ evalspmats = {spmats{1}};
 usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 phizsca = usca(:,:,1)/2;
 
-phiztot = phizsca + phizinc;
+utot = phizsca + phizinc;
 
-phiztot = reshape(phiztot,size(xxgrid));
+utot = reshape(utot,size(xxgrid));
 
 figure(2);
 pc = pcolor(xxgrid,yygrid,real(mu)); shading interp;
@@ -133,18 +133,17 @@ figure(3); clf
 tiledlayout(2,2)
 
 nexttile
-pc = pcolor(xxgrid,yygrid,real(phiztot)); shading interp;
+pc = pcolor(xxgrid,yygrid,real(utot)); shading interp;
 title('real(\phi_z)')
 colorbar
 
 nexttile
-pc = pcolor(xxgrid,yygrid,abs(phiztot)); shading interp;
+pc = pcolor(xxgrid,yygrid,abs(utot)); shading interp;
 title('|\phi_z|')
 colorbar
        
 % Calculate error with finite difference
-utots = cat(3,phiztot);
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'flex');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs,10,10,zk,dinds,'flex');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
