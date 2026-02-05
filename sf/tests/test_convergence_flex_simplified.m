@@ -68,23 +68,25 @@ errs(ii) = get_fin_diff_err(xxgrid,yygrid,utot,h,coefs,0.1,0.1,zk,dinds,'sf');
 
 end
 
-%%
-
 mus = abs(mus(1:end-1) - mus(end)) / abs(mus(end));
 
-figure(2);
+%%
+
+
+figure(2); clf
+t = tiledlayout(1,2);
+nexttile
 plot(log10(Ns(1:end-1)),log10(mus),'x-');
 hold on
-plot(log10(Ns),log10(1e10*Ns.^(-8)))
+plot(log10(Ns),log10(1e8*Ns.^(-8)))
 xlabel('log_{10}(N)')
-legend('error','N^{-8}')
+legend('error','N^{-6}')
+title('self-convergence')
 
-return
-
-
-figure(2);
+nexttile
 plot(log10(Ns),log10(errs),'x-');
 hold on
-plot(log10(Ns),log10(1e15*Ns.^(-8)))
+plot(log10(Ns),log10(1e10*Ns.^(-6)))
 xlabel('log_{10}(N)')
-legend('error','N^{-8}')
+legend('error','N^{-6}')
+title('finite difference')

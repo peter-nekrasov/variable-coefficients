@@ -1,15 +1,12 @@
-% solve the forward problem given G and corrections
+L = 1000;
+Ns = [51,101,201,301,401,501,601];
 
-%%%%%
-%
-% Solving the adjointed Lippman-Schwinger equation for plane wave 
-% scattering of flexural waves
-%
-%%%%%
+errs = zeros(length(Ns),1);
+mus = zeros(length(Ns),1);
 
-L = 1000; % length of grid
-N1 = 400; % number of grid points
+for ii = 1:length(Ns)
 
+N1 = Ns(ii);
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
@@ -25,13 +22,6 @@ fprintf('Number of points: %d \n',size(dinds,1))
 % Finding positive real roots
 zk = (b0/a0)^0.25;
 
-% RHS (Incident field)
-
-% incfield = 'pointsource';
-incfield = 'planewave';
-
-if strcmpi(incfield,'planewave')
-
 theta = pi/4;
 pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
 uinc = pws(:,:,1);
@@ -43,50 +33,7 @@ uincs(:,:,6) = pws(dinds,:,7) + pws(dinds,:,9);
 uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
 % uincs(:,:,8) = pws(dinds,:,1) / zk;
 
-elseif strcmpi(incfield,'pointsource')
-
-uincs = flexgreen2(zk,[-L/2;-L/2],[xxgrid(:) yygrid(:)].');
-uinc = uincs(:,:,1);
-uincs = uincs(dinds,:,:);
-
-end
-
 rhs_vec = get_rhs(coefs,uincs);
-
-% coefs = coefs/2;
-
-figure(1); clf
-tiledlayout(2,2);
-
-nexttile
-aplot = pcoefs{1} + pcoefs{2};
-pcolor(xxgrid,yygrid,aplot); shading interp;
-colorbar
-title('\alpha')
-drawnow
-
-nexttile
-bplot = pcoefs{3} + pcoefs{4};
-pcolor(xxgrid,yygrid,bplot); shading interp;
-colorbar
-title('\beta')
-drawnow
-
-nexttile
-uiplot = reshape(uinc,size(xxgrid));
-pcolor(xxgrid,yygrid,real(uiplot)); shading interp;
-colorbar
-title('u^{(i)}')
-drawnow
-
-nexttile
-rhsplot = zeros(length(xxgrid(:)),1);
-rhsplot(dinds) = rhs_vec;
-rhsplot = reshape(rhsplot,size(xxgrid));
-pcolor(xxgrid,yygrid,real(rhsplot)); shading interp;
-colorbar
-title('rhs')
-drawnow
 
 % Constructing integral operators
 [src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
@@ -117,29 +64,31 @@ usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 utot = uinc + usca;
 
 utot = reshape(utot,size(xxgrid));
-
-figure(2);
-pc = pcolor(xxgrid,yygrid,real(mu)); shading interp;
-title('Re(\mu)')
-colorbar
-
-figure(3); clf
-tiledlayout(1,2)
-
-nexttile
-pc = pcolor(xxgrid,yygrid,real(utot)); shading interp;
-title('real(u)')
-colorbar
-
-nexttile
-pc = pcolor(xxgrid,yygrid,abs(utot)); shading interp;
-title('|u|')
-colorbar
        
-% Calculate error with finite difference
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs,10,10,zk,dinds,'flex');
+mus(ii) = mu((N1-1)/2+1,(N1-1)/2+1);
+errs(ii) =  get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs,20,20,zk,dinds,'flex');
 
-fprintf('Absolute error: %.4e \n',abs_err)
-fprintf('Relative error: %.4e \n',rel_err)
+end
+mus = abs(mus(1:end-1) - mus(end)) / abs(mus(end));
 
-return
+
+%%
+
+
+figure(2); clf
+t = tiledlayout(1,2);
+nexttile
+plot(log10(Ns(1:end-1)),log10(mus),'x-');
+hold on
+plot(log10(Ns),log10(1e6*Ns.^(-6)))
+xlabel('log_{10}(N)')
+legend('error','N^{-6}')
+title('self-convergence')
+
+nexttile
+plot(log10(Ns),log10(errs),'x-');
+hold on
+plot(log10(Ns),log10(1e3*Ns.^(-6)))
+xlabel('log_{10}(N)')
+legend('error','N^{-6}')
+title('finite difference')

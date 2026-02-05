@@ -336,11 +336,11 @@ function [err1,err2] = get_fin_diff_err(X,Y,utots,h,coefs,xloc,yloc,zk,dinds,eqt
 
     alpha = coefs{1} + coefs{2};
     beta = coefs{3} + coefs{4};
-    alphax = coefs{7};
-    alphay = coefs{8};
-    alphaxx = coefs{9};
-    alphaxy = coefs{10};
-    alphayy = coefs{11};
+    alphax = coefs{5};
+    alphay = coefs{6};
+    alphaxx = coefs{7};
+    alphaxy = coefs{8};
+    alphayy = coefs{9};
     nu = coefs{end};
     alphalap = alphaxx + alphayy;
 
