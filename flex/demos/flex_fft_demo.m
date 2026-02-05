@@ -17,6 +17,8 @@ h = xs(2) - xs(1);
 [coefs,dinds,pcoefs] = bump2(xxgrid,yygrid,5,50,8,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
+coefs = coefs(:,:,1:end-1);
+
 a0 = pcoefs{1}; 
 b0 = pcoefs{3}; 
 g0 = pcoefs{5}; 
@@ -24,9 +26,7 @@ g0 = pcoefs{5};
 fprintf('Number of points: %d \n',size(dinds,1))
 
 % Finding positive real roots
-[rts,ejs] = find_roots(b0 / a0, g0 / a0);
-ejs = ejs/a0;
-zk = rts((abs(angle(rts)) < 1e-6) & (real(rts) > 0));
+zk = (-b0/a0)^0.25;
 
 % RHS (Incident field)
 
@@ -40,17 +40,17 @@ pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
 phizinc = pws(:,:,1);
 phiinc = pws(:,:,1) / zk;
 
-uincs = zeros([size(dinds) 8]);
+uincs = zeros([size(dinds) 7]);
 uincs(:,:,1) = pws(dinds,:,1);
 uincs(:,:,2:4) = pws(dinds,:,4:6);
 uincs(:,:,5) = pws(dinds,:,4) + pws(dinds,:,6);
 uincs(:,:,6) = pws(dinds,:,7) + pws(dinds,:,9);
 uincs(:,:,7) = pws(dinds,:,8) + pws(dinds,:,10);
-uincs(:,:,8) = pws(dinds,:,1) / zk;
+% uincs(:,:,8) = pws(dinds,:,1) / zk;
 
 elseif strcmpi(incfield,'pointsource')
 
-uincs = fggreen([-L/2;-L/2],[xxgrid(:) yygrid(:)].',rts,ejs);
+uincs = flexgreen2(zk,[-L/2;-L/2],[xxgrid(:) yygrid(:)].');
 phizinc = uincs(:,:,1)/2;
 phiinc = uincs(:,:,end);
 uincs = uincs(dinds,:,:);
@@ -59,7 +59,7 @@ uincs(:,:,1:end-1) = uincs(:,:,1:end-1)/2;
 end
 
 rhs_vec = get_rhs(coefs,uincs);
-coefs(:,:,1:end-1) = coefs(:,:,1:end-1)/2;
+coefs = coefs/2;
 
 figure(1); clf
 tiledlayout(2,2);
@@ -96,8 +96,8 @@ drawnow
 
 % Constructing integral operators
 [src,targ,ind,sz,N2] = get_fft_grid(N1,L,1);
-[inds,corrs] = get_correct_fg(h,a0);
-gfunc = @(s,t) fggreen(s,t,rts,ejs);
+[inds,corrs] = get_correct_flex(h);
+gfunc = @(s,t) flexgreen2(zk,s,t);
 spmats = get_sparse_corr_mat([N1 N1],inds,corrs);
 idspmats = id_plus_corr_sum(coefs,spmats,dinds,h);
 %kerns = kernmat(src,targ,gfunc,h);
@@ -113,19 +113,16 @@ mu(dinds) = sol;
 t1 = toc(start);
 fprintf('%5.2e s : time to solve\n',t1)
 
-evalkerns = kerns(:,:,[1,8]);
-evalspmats = {spmats{1},spmats{8}};
+evalkerns = kerns(:,:,1);
+evalspmats = {spmats{1}};
 
 % usca = sol_eval_fft_sub(sol,evalkerns,evalspmats,h,dinds,iinds,jinds,N1,N2);
 usca = sol_eval_fft(sol,evalkerns,iinds,jinds,N1,N2);
 phizsca = usca(:,:,1)/2;
-phisca = usca(:,:,2);
 
 phiztot = phizsca + phizinc;
-phitot = phisca + phiinc;
 
 phiztot = reshape(phiztot,size(xxgrid));
-phitot = reshape(phitot,size(xxgrid));
 
 figure(2);
 pc = pcolor(xxgrid,yygrid,real(mu)); shading interp;
@@ -134,16 +131,6 @@ colorbar
 
 figure(3); clf
 tiledlayout(2,2)
-
-nexttile
-pc = pcolor(xxgrid,yygrid,real(phitot)); shading interp;
-title('Re(\phi)')
-colorbar
-
-nexttile
-pc = pcolor(xxgrid,yygrid,abs(phitot)); shading interp;
-title('|\phi|')
-colorbar
 
 nexttile
 pc = pcolor(xxgrid,yygrid,real(phiztot)); shading interp;
@@ -156,8 +143,8 @@ title('|\phi_z|')
 colorbar
        
 % Calculate error with finite difference
-utots = cat(3,phiztot,phitot);
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'fg');
+utots = cat(3,phiztot);
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utots,h,pcoefs,10,10,zk,dinds,'flex');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
