@@ -1,4 +1,4 @@
-function [val,grad] = flexgreen(zk,src,targ)
+function [val,grad,hess,third] = flexgreen(zk,src,targ)
 
 [~,ns] = size(src);
 [~,nt] = size(targ);
@@ -20,6 +20,21 @@ elseif nargout == 2
 [val,grad] = hkdiffgreen(zk,src,targ);
 val = 1/(2*zk^2)*val;
 grad = 1/(2*zk^2)*grad;
+
+val(r2 < 1e-8) = 1/(2*zk^2)*hkdiffgreen(zk,[0;0],[0;1e-8]);
+elseif nargout == 3
+[val,grad,hess] = hkdiffgreen(zk,src,targ);
+val = 1/(2*zk^2)*val;
+grad = 1/(2*zk^2)*grad;
+hess = 1/(2*zk^2)*hess;
+
+val(r2 < 1e-8) = 1/(2*zk^2)*hkdiffgreen(zk,[0;0],[0;1e-8]);
+elseif nargout == 4
+[val,grad,hess,third] = hkdiffgreen(zk,src,targ);
+val = 1/(2*zk^2)*val;
+grad = 1/(2*zk^2)*grad;
+hess = 1/(2*zk^2)*hess;
+third = 1/(2*zk^2)*third;
 
 val(r2 < 1e-8) = 1/(2*zk^2)*hkdiffgreen(zk,[0;0],[0;1e-8]);
 end
