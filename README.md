@@ -18,10 +18,15 @@ $$ \Delta^2 u - k^4(1+V(x)) u = 0 $$
 
 $$ \frac12 ( \alpha \Delta^2 - \beta (1+V) ) u  + \gamma \int_{\Omega} \frac{1}{4\pi | x - y \ |} u(y) dy = 0 $$
 
+- Flexural (flex):
+
+$$  \left( \Delta( \alpha \Delta) + (1-\nu) \left( 2 \partial_{x_1 x_2} \alpha \ \partial_{x_1 x_2} - \partial_{x_1}^2 \alpha \ \partial^2_{x_2}  - \partial_{x_2}^2 \alpha \ \partial_{x_1}^2  \right)  - \beta \right) u  = 0  $$
+
 - Flexural-Gravity (flex-gravity):
 
 $$  \frac12 \left( \Delta( \alpha \Delta) + (1-\nu) \left( 2 \partial_{x_1 x_2} \alpha \ \partial_{x_1 x_2} - \partial_{x_1}^2 \alpha \ \partial^2_{x_2}  - \partial_{x_2}^2 \alpha \ \partial_{x_1}^2  \right)  - \beta \right) u + \gamma \int_{\Omega} \frac{1}{4\pi | x - y \ |} u(y) dy = 0  $$
 
+where $\alpha$ is the rigidity, $\beta$ is the difference between the plate's inertia and gravitational force on the fluid (when it exists) and $\gamma$ is related to the hydrodynamic pressure.
 
 
 These scattering problems are solved using either FFT + GMRES or using recursive skeletonization with proxy surfaces. The former tends to be faster, but the latter may be better for geometries with resonances where GMRES tends to suffer. 
