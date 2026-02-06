@@ -14,7 +14,8 @@ xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-[~,~,pcoefs] = bump4(xxgrid,yygrid,0.5,50,4,1e-12);
+ w = 8;
+[~,~,pcoefs] = bump4(xxgrid,yygrid,0.5,50,w,1e-12);
 
 a0 = pcoefs{1}; 
 b0 = pcoefs{3}; 
@@ -30,8 +31,8 @@ kerns = kernmat(src,targ,gfunc,h,inds,corrs);
 kerns = gen_fft_kerns(kerns,sz,ind);
 kerns = kerns / a0;
 
-amp = 0.5;
-[coefs0,dinds0,pcoefs,alpha0] = bump4(xxgrid,yygrid,amp,50,4,1e-12);
+amp = 1; width = 80;
+[coefs0,dinds0,pcoefs0,~,alpha0] = bump4(xxgrid,yygrid,amp,width,w,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds0);
 
 
@@ -58,12 +59,13 @@ fprintf('%5.2e s : time to solve\n',t1)
 coefspad = zeros(numel(xxgrid),1,size(coefs0,3));
 coefspad(dinds0,:,:) = coefs0;
 
+utot = uinc + usca0;
 
 deltas = 10.^(-3:-1:-4);
 dus = zeros(2,length(deltas));
 for i = 1:length(deltas)
 delta = deltas(i);
-[coefs,dinds,~,alpha] = bump4(xxgrid,yygrid,amp+delta,50,4,1e-12);
+[coefs,dinds,~,~,alpha] = bump4(xxgrid,yygrid,amp+delta,width,w,1e-12);
 rhs_vec = get_rhs(coefs,uincs(dinds,:,:));
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 [usca, sol] = solve_flex(rhs_vec, coefs, kerns, iinds, jinds, N1, N2);
@@ -73,44 +75,55 @@ rhs_vec = get_rhs(coefs,uincs(dinds,:,:));
 % % dcoefs = coefs - reshape(coefspad(dinds,:),[],1,size(coefs,3)).*alphascale;
 % 
 
-[coefsp,dindsp,pcoefsp,alphap] = bump4(xxgrid,yygrid,amp+delta,50,4,1e-12);
-[coefsm,dindsm,pcoefsm,alpham] = bump4(xxgrid,yygrid,amp-delta,50,4,1e-12);
+[coefsp,dindsp,pcoefsp,~,alphap] = bump4(xxgrid,yygrid,amp+delta,width,w,1e-12);
+[coefsm,dindsm,pcoefsm,~,alpham] = bump4(xxgrid,yygrid,amp-delta,width,w,1e-12);
 % dcoefs = (coefsp.*alphap(dinds) - coefsm.*alpham(dinds))./alpha(dinds)/2/delta;
-% coefsmpad = zeros(numel(alpham(:)),1,size(coefs,3));
-% coefsmpad(dindsm,:,:) = coefsm.*alpham(dindsm);
+coefsmpad = zeros(numel(alpham(:)),1,size(coefs,3));
+coefsmpad(dindsm,:,:) = -coefsm.*alpham(dindsm);
+coefsmpad(dindsp,:,:) =coefsmpad(dindsp,:,:)+ coefsp.*alphap(dindsp);
+coefsmpad = coefsmpad/2/delta;
 % dcoefs = (coefsp.*alphap(dindsp) - coefsmpad(dindsp,:,:))/2/delta;
-% dalpha = (alphap-alpham)/2/delta;
+dcoefs = coefsmpad(dinds0,:,:);
+dalpha = (alphap-alpham)/2/delta./alpha0;
+dcoefs = dcoefs./alpha0(dinds0);
 
 
-dbeta = (pcoefsp{4} - pcoefsm{4})/2/delta;
 
 % dcoefs = (coefsp - coefsm)/2/delta;
 
 % coefsmpad(dindsm,:,:) = coefsm;
 % dcoefs = (coefsp - coefsmpad(dindsp,:,:))/2/delta;
-% rhs2 = fast_apply_fft(mu(dinds),kerns,dcoefs,iinds,jinds,N2);
-% rhs2 = rhs2 - mu(dinds);
 
-rhs2 = dbeta(dinds).*(usca0(dinds)+uinc(dinds))./alpha0(dinds);
+[iinds,jinds] = ind2sub(size(xxgrid),dinds0);
 
-% rhs2 = rhs2 + (dalpha(dindsp)).*mu(dinds);
-% rhs2 = rhs2./alpha(dinds);
-[freshu, ~] = solve_flex(rhs2, coefs0, kerns, iinds, jinds, N1, N2);
-% [freshu2, ~] = solve_flex(-(dalpha(dindsp)).*mu(dinds)./alpha(dinds), coefs, kerns, iinds, jinds, N1, N2);
+
+rhs2 = fast_apply_fft(mu(dinds0),kerns,dcoefs,iinds,jinds,N2);
+rhs2 = rhs2 - mu(dinds0);
+rhs2 = -(rhs2 + (dalpha(dinds0)).*mu(dinds0));
+
+rhs2 = rhs2 + get_rhs(dcoefs,uincs(dinds0,:,:));
+rhs2 = -rhs2;
+
+% dbeta = (pcoefsp{4} - pcoefsm{4})/2/delta;
+% rhs2 = -dbeta(dinds0).*(utot(dinds0))./alpha0(dinds0);
+[freshu, ~] = solve_flex(-rhs2, coefs0, kerns, iinds, jinds, N1, N2);
+
+
 dus(1,i) = norm(usca - usca0) / norm(usca);
 dus(2,i) = norm(usca - freshu*delta- usca0) / norm(usca);
+
 
 % [norm(coefsp.*alphap(dindsp)  - coefspad(dindsp,:,:).*alpha0(dindsp),'fro')/norm(coefsp.*alphap(dindsp),'fro')...
 % ,norm(coefsp.*alphap(dindsp) - delta*dcoefs  - coefspad(dindsp,:,:).*alpha0(dindsp),'fro')/norm(coefsp.*alphap(dindsp),'fro'),...
 % norm(alphap - alpha0), norm(alphap - delta*dalpha - alpha0)]
 
 % norm(dcoefs,'fro')
-norm(dbeta,'fro')
+% norm(dbeta,'fro')
 end
 
 [deltas; dus]
 
-utot = uinc + usca0;
+
 
 utot = reshape(utot,size(xxgrid));
 
@@ -138,21 +151,21 @@ colorbar
 figure(3);clf
 tiledlayout(1,2)
 nexttile
-pc = pcolor(xxgrid,yygrid,reshape(abs(usca - usca0)/delta,size(xxgrid))); shading interp;
+pc = pcolor(xxgrid,yygrid,reshape(real(usca - usca0)/delta,size(xxgrid))); shading interp;
 colorbar
 % xlim([-10,10]*5)
 % ylim([-10,10]*5)       
 
 nexttile
 upad = zeros(size(xxgrid)); upad(dinds) = rhs2;
-% pc = pcolor(xxgrid,yygrid,reshape(abs(fresh),size(xxgrid))); shading interp;
-pc = pcolor(xxgrid,yygrid,abs(upad)); shading interp;
+pc = pcolor(xxgrid,yygrid,reshape(c*real(freshu),size(xxgrid))); shading interp;
+% pc = pcolor(xxgrid,yygrid,abs(upad)); shading interp;
 colorbar
 % xlim([-10,10]*5)       
 % ylim([-10,10]*5)       
 
 % Calculate error with finite difference
-[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs,10,10,zk,dinds0,'flex');
+[abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs0,10,10,zk,dinds0,'flex');
 
 fprintf('Absolute error: %.4e \n',abs_err)
 fprintf('Relative error: %.4e \n',rel_err)
