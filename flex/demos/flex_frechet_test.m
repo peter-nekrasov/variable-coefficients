@@ -81,20 +81,26 @@ coefsmpad(dindsm,:,:) = coefsm.*alpham(dindsm);
 dcoefs = (coefsp.*alphap(dindsp) - coefsmpad(dindsp,:,:))/2/delta;
 dalpha = (alphap-alpham)/2/delta;
 
+
+dcoefs = (coefsp - coefsm)/2/delta;
+
 % coefsmpad(dindsm,:,:) = coefsm;
 % dcoefs = (coefsp - coefsmpad(dindsp,:,:))/2/delta;
 rhs2 = fast_apply_fft(mu(dinds),kerns,dcoefs,iinds,jinds,N2);
 rhs2 = rhs2 - mu(dinds);
-rhs2 = rhs2 + (dalpha(dindsp)).*mu(dinds);
-rhs2 = rhs2./alpha(dinds);
+
+rhs2 = usca(dinds)./alpha(dinds);
+
+% rhs2 = rhs2 + (dalpha(dindsp)).*mu(dinds);
+% rhs2 = rhs2./alpha(dinds);
 [freshu, ~] = solve_flex(-rhs2, coefs, kerns, iinds, jinds, N1, N2);
 % [freshu2, ~] = solve_flex(-(dalpha(dindsp)).*mu(dinds)./alpha(dinds), coefs, kerns, iinds, jinds, N1, N2);
 dus(1,i) = norm(usca - usca0) / norm(usca);
 dus(2,i) = norm(usca - freshu*delta- usca0) / norm(usca);
 
-[norm(coefsp.*alphap(dindsp)  - coefspad(dindsp,:,:).*alpha0(dindsp),'fro')/norm(coefsp.*alphap(dindsp),'fro')...
-,norm(coefsp.*alphap(dindsp) - delta*dcoefs  - coefspad(dindsp,:,:).*alpha0(dindsp),'fro')/norm(coefsp.*alphap(dindsp),'fro'),...
-norm(alphap - alpha0), norm(alphap - delta*dalpha - alpha0)]
+% [norm(coefsp.*alphap(dindsp)  - coefspad(dindsp,:,:).*alpha0(dindsp),'fro')/norm(coefsp.*alphap(dindsp),'fro')...
+% ,norm(coefsp.*alphap(dindsp) - delta*dcoefs  - coefspad(dindsp,:,:).*alpha0(dindsp),'fro')/norm(coefsp.*alphap(dindsp),'fro'),...
+% norm(alphap - alpha0), norm(alphap - delta*dalpha - alpha0)]
 
 % norm(dcoefs,'fro')
 end

@@ -11,9 +11,13 @@ function [icoefs,dinds,pcoefs,H,alpha] = bump4(X,Y,amp,width,w,eps)
     b0 = (rhoi*H0*w^2);
     Hbar = amp*exp(-(X.^2 + Y.^2)/(2*width^2));
     H = H0 + Hbar;
-
-    alpha = E*H.^3/(12*(1-nu^2));
     beta = rhoi*H*w^2;
+
+    amp = 0.5;
+    Hbar = amp*exp(-(X.^2 + Y.^2)/(2*width^2));
+    H = H0 + Hbar;
+    alpha = E*H.^3/(12*(1-nu^2));
+    
 
     abar = alpha - a0;
     bbar = beta - b0;
