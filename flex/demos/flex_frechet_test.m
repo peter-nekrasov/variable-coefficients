@@ -30,7 +30,7 @@ kerns = kernmat(src,targ,gfunc,h,inds,corrs);
 kerns = gen_fft_kerns(kerns,sz,ind);
 kerns = kerns / a0;
 
-amp = 0.4;
+amp = 0.5;
 [coefs0,dinds0,pcoefs,alpha0] = bump4(xxgrid,yygrid,amp,50,4,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds0);
 
@@ -68,32 +68,34 @@ rhs_vec = get_rhs(coefs,uincs(dinds,:,:));
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 [usca, sol] = solve_flex(rhs_vec, coefs, kerns, iinds, jinds, N1, N2);
 
-alphascale = alpha0(dinds)./alpha(dinds);
+% alphascale = alpha0(dinds)./alpha(dinds);
+% 
+% % dcoefs = coefs - reshape(coefspad(dinds,:),[],1,size(coefs,3)).*alphascale;
+% 
 
-% dcoefs = coefs - reshape(coefspad(dinds,:),[],1,size(coefs,3)).*alphascale;
-
-
-[coefsp,dindsp,~,alphap] = bump4(xxgrid,yygrid,amp+delta,50,4,1e-12);
-[coefsm,dindsm,~,alpham] = bump4(xxgrid,yygrid,amp-delta,50,4,1e-12);
+[coefsp,dindsp,pcoefsp,alphap] = bump4(xxgrid,yygrid,amp+delta,50,4,1e-12);
+[coefsm,dindsm,pcoefsm,alpham] = bump4(xxgrid,yygrid,amp-delta,50,4,1e-12);
 % dcoefs = (coefsp.*alphap(dinds) - coefsm.*alpham(dinds))./alpha(dinds)/2/delta;
-coefsmpad = zeros(numel(alpham(:)),1,size(coefs,3));
-coefsmpad(dindsm,:,:) = coefsm.*alpham(dindsm);
-dcoefs = (coefsp.*alphap(dindsp) - coefsmpad(dindsp,:,:))/2/delta;
-dalpha = (alphap-alpham)/2/delta;
+% coefsmpad = zeros(numel(alpham(:)),1,size(coefs,3));
+% coefsmpad(dindsm,:,:) = coefsm.*alpham(dindsm);
+% dcoefs = (coefsp.*alphap(dindsp) - coefsmpad(dindsp,:,:))/2/delta;
+% dalpha = (alphap-alpham)/2/delta;
 
 
-dcoefs = (coefsp - coefsm)/2/delta;
+dbeta = (pcoefsp{4} - pcoefsm{4})/2/delta;
+
+% dcoefs = (coefsp - coefsm)/2/delta;
 
 % coefsmpad(dindsm,:,:) = coefsm;
 % dcoefs = (coefsp - coefsmpad(dindsp,:,:))/2/delta;
-rhs2 = fast_apply_fft(mu(dinds),kerns,dcoefs,iinds,jinds,N2);
-rhs2 = rhs2 - mu(dinds);
+% rhs2 = fast_apply_fft(mu(dinds),kerns,dcoefs,iinds,jinds,N2);
+% rhs2 = rhs2 - mu(dinds);
 
-rhs2 = usca(dinds)./alpha(dinds);
+rhs2 = dbeta(dinds).*(usca0(dinds)+uinc(dinds))./alpha0(dinds);
 
 % rhs2 = rhs2 + (dalpha(dindsp)).*mu(dinds);
 % rhs2 = rhs2./alpha(dinds);
-[freshu, ~] = solve_flex(-rhs2, coefs, kerns, iinds, jinds, N1, N2);
+[freshu, ~] = solve_flex(rhs2, coefs0, kerns, iinds, jinds, N1, N2);
 % [freshu2, ~] = solve_flex(-(dalpha(dindsp)).*mu(dinds)./alpha(dinds), coefs, kerns, iinds, jinds, N1, N2);
 dus(1,i) = norm(usca - usca0) / norm(usca);
 dus(2,i) = norm(usca - freshu*delta- usca0) / norm(usca);
@@ -103,6 +105,7 @@ dus(2,i) = norm(usca - freshu*delta- usca0) / norm(usca);
 % norm(alphap - alpha0), norm(alphap - delta*dalpha - alpha0)]
 
 % norm(dcoefs,'fro')
+norm(dbeta,'fro')
 end
 
 [deltas; dus]
@@ -129,6 +132,25 @@ pc = pcolor(xxgrid,yygrid,abs(utot)); shading interp;
 title('|u|')
 colorbar
        
+
+
+%%
+figure(3);clf
+tiledlayout(1,2)
+nexttile
+pc = pcolor(xxgrid,yygrid,reshape(abs(usca - usca0)/delta,size(xxgrid))); shading interp;
+colorbar
+% xlim([-10,10]*5)
+% ylim([-10,10]*5)       
+
+nexttile
+upad = zeros(size(xxgrid)); upad(dinds) = rhs2;
+% pc = pcolor(xxgrid,yygrid,reshape(abs(fresh),size(xxgrid))); shading interp;
+pc = pcolor(xxgrid,yygrid,abs(upad)); shading interp;
+colorbar
+% xlim([-10,10]*5)       
+% ylim([-10,10]*5)       
+
 % Calculate error with finite difference
 [abs_err,rel_err] = get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs,10,10,zk,dinds0,'flex');
 
