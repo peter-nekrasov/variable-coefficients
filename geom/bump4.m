@@ -2,16 +2,18 @@ function [icoefs,dinds,pcoefs,H,alpha] = bump4(X,Y,amp,width,w,eps)
 
     E = 7*10^9;
     nu = 0.33;
-    % H0 = 5;
+    H0 = 5;
     rhoi = 917;
 
     % a0 = E*H0^3/(12*(1-nu^2));
-    H0 = (E*1*(12*(1-nu^2))/E)^(1/3);
+    % H0 = (E*1*(12*(1-nu^2))/E)^(1/3);
     a0 = E*H0^3/(12*(1-nu^2));
     b0 = (rhoi*H0*w^2);
+    % b0 = E*H0;
     Hbar = amp*exp(-(X.^2 + Y.^2)/(2*width^2));
     H = H0 + Hbar;
     beta = rhoi*H*w^2;
+    % beta = E*H;
 
     dinds = find(abs(Hbar / H0) > eps);
     % amp =0.5;
