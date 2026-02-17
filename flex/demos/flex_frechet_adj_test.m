@@ -112,12 +112,12 @@ dcoefs = dcoefs./alpha0(dinds0);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds0);
 
 % dcoefs(:,:,[1:4]) = 0;
-% rhsfresh = get_rhs(dcoefs,utots(dinds0,:,:));
+rhsfresh = get_rhs(dcoefs,utots(dinds0,:,:)) - (dalpha(dinds0)).*mu(dinds0);
 
-rhsfresh = fast_apply_fft(mu(dinds0),kerns,dcoefs,iinds,jinds,N2);
-rhsfresh = rhsfresh - mu(dinds0);
-rhsfresh = -(rhsfresh + (dalpha(dinds0)).*mu(dinds0));
-rhsfresh = rhsfresh + get_rhs(dcoefs,uincs(dinds0,:,:));
+% rhsfresh = fast_apply_fft(mu(dinds0),kerns,dcoefs,iinds,jinds,N2);
+% rhsfresh = rhsfresh - mu(dinds0);
+% rhsfresh = -(rhsfresh + (dalpha(dinds0)).*mu(dinds0));
+% rhsfresh = rhsfresh + get_rhs(dcoefs,uincs(dinds0,:,:));
 
 [freshu, freshsol] = solve_flex(rhsfresh, coefs0, kerns, iinds, jinds, N1, N2);
 dus(1,i) = norm(usca(:,:,1) - usca0(:,:,1)) / norm(usca(:,:,1));
@@ -134,7 +134,7 @@ freshu_adj = freshu_adj + (usrcs(:,:,:));
 
 vals(2,i) = sum(alpha0(dinds0).*rhsfresh.*conj(freshu_adj(dinds0,1))) * h^2;
 
-freshu_adj = alpha0(dinds0).*get_rhs(dcoefs,freshu_adj(dinds0,:,:));
+freshu_adj = alpha0(dinds0).*(get_rhs(dcoefs,freshu_adj(dinds0,:,:)) - (dalpha(dinds0)).*freshadj_sol);
 
 vals(3,i) = sum(utot(dinds0).*conj(freshu_adj)) * h^2;
 
