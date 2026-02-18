@@ -8,7 +8,7 @@
 %%%%%
 
 L = 1000; % length of grid
-N1 = 401; % number of grid points
+N1 = 201; % number of grid points
 
 xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = ndgrid(xs);
@@ -31,9 +31,8 @@ kerns = kernmat(src,targ,gfunc,h,inds,corrs);
 kerns = gen_fft_kerns(kerns,sz,ind);
 kerns = kerns / a0;
 
-amp = 2; width = 55;
+amp = 2; width = 35;
 amp = 0.5;
-amp = 1; width = 80;
 [coefs0,dinds0,pcoefs0,~,alpha0] = bump4(xxgrid,yygrid,amp,width,w,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds0);
 
@@ -41,7 +40,7 @@ amp = 1; width = 80;
 nsrc = 1;
 f = (1:nsrc);
 thetas = 2*pi*(1:nsrc)/nsrc;
-srcs = L/2*[cos(thetas);sin(thetas)];
+srcs = L*[cos(thetas);sin(thetas)];
 targ2 = [xxgrid(:) yygrid(:)].';
 sensfuns = kernmat(srcs,targ2,gfunc,h);
 % sensfuns = gfunc(srcs,targ2)*h*h;
@@ -53,21 +52,21 @@ fprintf('Number of points: %d \n',size(dinds0,1))
 
 % RHS (Incident field)
 
-incfield = 'pointsource';
+% % incfield = 'pointsource';
 
 % uincs = flexgreen2(zk,[-L/2;-L/2],[xxgrid(:) yygrid(:)].');
 
-% theta =0;
-% pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
-% 
-% uincs = zeros([size(xxgrid(:)) 7]);
-% uincs(:,:,1) = pws(:,:,1);
-% uincs(:,:,2:4) = pws(:,:,4:6);
-% uincs(:,:,5) = pws(:,:,4) + pws(:,:,6);
-% uincs(:,:,6) = pws(:,:,7) + pws(:,:,9);
-% uincs(:,:,7) = pws(:,:,8) + pws(:,:,10);
-% 
-% uinc = uincs(:,:,1);
+theta =0;
+pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
+
+uincs = zeros([size(xxgrid(:)) 7]);
+uincs(:,:,1) = pws(:,:,1);
+uincs(:,:,2:4) = pws(:,:,4:6);
+uincs(:,:,5) = pws(:,:,4) + pws(:,:,6);
+uincs(:,:,6) = pws(:,:,7) + pws(:,:,9);
+uincs(:,:,7) = pws(:,:,8) + pws(:,:,10);
+
+uinc = uincs(:,:,1);
 
 rhs_vec0 = get_rhs(coefs0,uincs(dinds0,:,:));
 
@@ -142,6 +141,7 @@ vals(3,i) = sum(utot(dinds0).*conj(freshu_adj)) * h^2;
 
 
 end
+
 
 [deltas; dus]
 vals

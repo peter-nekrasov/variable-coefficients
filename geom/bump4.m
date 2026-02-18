@@ -6,7 +6,7 @@ function [icoefs,dinds,pcoefs,H,alpha] = bump4(X,Y,amp,width,w,eps)
     rhoi = 917;
 
     % a0 = E*H0^3/(12*(1-nu^2));
-    % H0 = (E*1*(12*(1-nu^2))/E)^(1/3);
+    H0 = (E*1*(12*(1-nu^2))/E)^(1/3);
     a0 = E*H0^3/(12*(1-nu^2));
     b0 = (rhoi*H0*w^2);
     % b0 = E*H0;
@@ -16,7 +16,8 @@ function [icoefs,dinds,pcoefs,H,alpha] = bump4(X,Y,amp,width,w,eps)
     % beta = E*H;
 
     dinds = find(abs(Hbar / H0) > eps);
-    amp =0.5;
+    % dinds = find(1+abs(Hbar / H0) > eps);
+    % amp = 0.5;
     Hbar = amp*exp(-(X.^2 + Y.^2)/(2*width^2));
     H = H0 + Hbar;
 
@@ -44,8 +45,6 @@ function [icoefs,dinds,pcoefs,H,alpha] = bump4(X,Y,amp,width,w,eps)
     ayy = 6*E*H.*Hy.^2/(12*(1-nu^2)) + 3*E*H.^2.*Hyy/(12*(1-nu^2));
 
     pcoefs = {a0/E,abar/E,b0/E,bbar/E,ax/E,ay/E,axx/E,axy/E,ayy/E,nu}; 
-
-    
 
     icoefs = zeros([size(dinds) 7]);
     % icoefs(:,:,1) = (abar(dinds)*b0 - a0*bbar(dinds)) / a0;
