@@ -1,5 +1,6 @@
-L = 1000;
+L = 20;
 Ns = [51,101,201,301,401,501,601];
+% Ns = [101];
 
 errs = zeros(length(Ns),1);
 mus = zeros(length(Ns),1);
@@ -11,7 +12,11 @@ xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-[coefs,dinds,pcoefs] = bump4(xxgrid,yygrid,0.5,50,4,1e-12);
+amp   = 1.0;
+width = 1.0;
+w     = 1000;
+eps   = 0;
+[coefs,dinds,pcoefs,~,~] = bump4(xxgrid,yygrid,amp,width,w,eps);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 a0 = pcoefs{1}; 
@@ -22,7 +27,7 @@ fprintf('Number of points: %d \n',size(dinds,1))
 % Finding positive real roots
 zk = (b0/a0)^0.25;
 
-theta = pi/4;
+theta = 0;
 pws = planewave(zk,[xxgrid(:) yygrid(:)].',theta,10);
 uinc = pws(:,:,1);
 uincs = zeros([size(dinds) 7]);
@@ -66,7 +71,7 @@ utot = uinc + usca;
 utot = reshape(utot,size(xxgrid));
        
 mus(ii) = mu((N1-1)/2+1,(N1-1)/2+1);
-errs(ii) =  get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs,20,20,zk,dinds,'flex');
+errs(ii) =  get_fin_diff_err(xxgrid,yygrid,utot,h,pcoefs,0.1,0.1,zk,dinds,'flex');
 
 end
 mus = abs(mus(1:end-1) - mus(end)) / abs(mus(end));
