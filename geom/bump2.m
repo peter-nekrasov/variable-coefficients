@@ -1,4 +1,4 @@
-function [icoefs,dinds,pcoefs,H] = bump2(X,Y,amp,width,w,eps)
+function [icoefs,dinds,pcoefs,H,H0] = bump2(X,Y,amp,width,w,eps)
 
     E = 7*10^9;
     nu = 0.33;

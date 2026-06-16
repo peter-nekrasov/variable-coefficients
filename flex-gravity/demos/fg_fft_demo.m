@@ -12,7 +12,11 @@ xs = linspace(-L/2,L/2,N1);
 [xxgrid,yygrid] = meshgrid(xs);
 h = xs(2) - xs(1);
 
-[coefs,dinds,pcoefs] = bump2(xxgrid,yygrid,5,50,8,1e-12);
+H0 = 5; 
+Hbar = 5*exp(-(xxgrid.^2 + yygrid.^2)/(2*80^2));
+
+[coefs,dinds,pcoefs] = make_coefs(xxgrid,yygrid,H0,Hbar,'fg');
+% [coefs,dinds,pcoefs] = bump2(xxgrid,yygrid,5,50,8,1e-12);
 [iinds,jinds] = ind2sub(size(xxgrid),dinds);
 
 a0 = pcoefs{1}; 
